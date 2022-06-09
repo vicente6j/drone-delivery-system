@@ -1,41 +1,38 @@
 import java.util.Scanner;
 import java.util.TreeMap;
 
-//additional imports
 import java.util.ArrayList;
 
 public class InterfaceLoop{
 
     public InterfaceLoop() { }
 
-    //variables
-    public static ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
-    public static ArrayList<Object[]> locationList = new ArrayList<Object[]>();
+    public static ArrayList<Ingredient> ingredientList = new ArrayList<>();
+    public static ArrayList<Location> locationList = new ArrayList<>();
+    public static ArrayList<DeliveryService> deliveryServicesList = new ArrayList<>();
+    public static ArrayList<Restaurant> restaurantList = new ArrayList<>();
 
-    //sindy
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) { 
-        Object[] ingr = new Object[] {init_barcode, init_name, init_weight};
-        Ingredient ingr = new Ingredient(init_barcode, init_name, init_weight);
-        if(ingredientList.size() != 0) {
-            int ok = 0;
-            for (int i = 0; i < ingredientList.size(); i++) {
-            String a = ingredientList.get(i).getName();
-            String b = ingr.getName();
+        Ingredient newIngredient = new Ingredient(init_barcode, init_name, init_weight);
+
+        int index = 0;
+        boolean added = false;
+        while (index < ingredientList.size()) {
+            String a = ingredientList.get(index).getName();
+            String b = newIngredient.getName();
             if(a.compareTo(b) > 0) {
-                ingredientList.add(i, ingr);
-                ok = 1;
+                ingredientList.add(index, newIngredient);
+                added = true;
                 break;
             }
-            }
-            if (ok == 0) {
-                ingredientList.add(ingr);
-            }
-        } else {
-            ingredientList.add(ingr);
+            index++;
+        }
+        if (!added) {
+            ingredientList.add(ingredientList.size(), newIngredient);
         }
         // make_ingredient,saf_spc,saffron,4
-        //make_ingredient,iku_sfd,ikura,9
-        //make_ingredient,truf_fgs,truffles,6
+        // make_ingredient,iku_sfd,ikura,9
+        // make_ingredient,truf_fgs,truffles,6
         
         System.out.println("OK:change_completed");
     }
@@ -68,16 +65,64 @@ public class InterfaceLoop{
         System.out.println("OK:display_completed");
     }
 
-    //person two
-    void checkDistance(String departure_point, String arrival_point) { }
+    
+    void checkDistance(String departure_point, String arrival_point) {
+        // Ensure that the departure_point and arrival_point parameters refer to valid Locations
+        Location departureLocation = null;
+        Location arrivalLocation = null;
+        
+        for (int i = 0; i < locationList.size(); i++) {
+            if (locationList.get(i).getName().equals(departure_point)) {
+                departureLocation = locationList.get(i);
+            } else if (locationList.get(i).getName().equals(arrival_point)) {
+                arrivalLocation = locationList.get(i);
+            }
+        }
+        
+        if (departureLocation != null && arrivalLocation != null) {
+            int distance = 1 + (int) Math.floor(Math.sqrt(Math.pow(arrivalLocation.getX() - departureLocation.getX(), 2) + Math.pow(arrivalLocation.getY() - departureLocation.getY(), 2)));
+            System.out.println("OK:distance = " + distance);
+        } else {
+            System.out.println("ERROR: Locations are not valid.");
+        }
+    }
 
-    void makeDeliveryService(String init_name, Integer init_revenue, String located_at) { }
+    void makeDeliveryService(String init_name, Integer init_revenue, String located_at) {
+        if (!Location.isValidLocation(located_at, locationList)) {
+            System.out.println("ERROR: The delivery service location is invalid.");
+        } else {
+            DeliveryService newDeliveryService = new DeliveryService(init_name, init_revenue, located_at);
+            deliveryServicesList.add(newDeliveryService);
+        }
+    }
 
-    void displayServices() { }
+    void displayServices() {
+        for (int i = 0; i < deliveryServicesList.size(); i++) {
+            DeliveryService currentDeliveryService = deliveryServicesList.get(i);
+            String result = "name: " + currentDeliveryService.getName() + ", " + "revenue: $" + currentDeliveryService.getRevenue() + ", " + "location: " + currentDeliveryService.getLocation();
+            System.out.println(result);
+        }
+        System.out.println("OK:display_completed");
+    }
 
-    void makeRestaurant(String init_name, String located_at) { }
+    void makeRestaurant(String init_name, String located_at) { 
+         if (!Location.isValidLocation(located_at, locationList)) {
+            System.out.println("ERROR: The restaurant location is invalid.");
+        } else {
+            Restaurant newRestaurant = new Restaurant(init_name, located_at);
+            restaurantList.add(newRestaurant);
+        }
+        System.out.println("OK:change_completed");
+    }
 
-    void displayRestaurants() { }
+    void displayRestaurants() {
+        for (int i = 0; i < restaurantList.size(); i++) {
+            Restaurant currentRestaurant = restaurantList.get(i);
+            String result = "name: " + currentRestaurant.getName() + ", " + "money_spent: $" + currentRestaurant.getMoneySpent() + ", " + "location: " + currentRestaurant.getLocation();
+            System.out.println(result);
+        }
+        System.out.println("OK:display_completed");
+    }
 
     void makeDrone(String service_name, Integer init_tag, Integer init_capacity, Integer init_fuel) { }
 

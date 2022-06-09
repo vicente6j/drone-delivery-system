@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Location {
 
     private String name;
@@ -52,6 +54,20 @@ public class Location {
 
     //subtracts remaining when drone lands
     public void droneLand(Integer droneNumber) {
-        this.remaining = this.remaining - droneNumber;
+        if (this.remaining < droneNumber) {
+            System.out.println("Not enough spaces.");
+        } else {
+            this.remaining = this.remaining - droneNumber;
+        }
+    }
+
+    public static boolean isValidLocation(String name, ArrayList<Location> locationList) {
+        boolean isValid = false;
+        for (int i = 0; i < locationList.size(); i++) {
+            if (locationList.get(i).getName().equals(name)) {
+                isValid = true;
+            }
+        }
+        return isValid;
     }
 }
