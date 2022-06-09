@@ -9,17 +9,18 @@ public class InterfaceLoop{
     public InterfaceLoop() { }
 
     //variables
-    public static ArrayList<Object[]> ingredientList = new ArrayList<Object[]>();
+    public static ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
     public static ArrayList<Object[]> locationList = new ArrayList<Object[]>();
 
     //sindy
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) { 
         Object[] ingr = new Object[] {init_barcode, init_name, init_weight};
+        Ingredient ingr = new Ingredient(init_barcode, init_name, init_weight);
         if(ingredientList.size() != 0) {
             int ok = 0;
             for (int i = 0; i < ingredientList.size(); i++) {
-            String a = (String)ingredientList.get(i)[1];
-            String b = (String)ingr[1];
+            String a = ingredientList.get(i).getName();
+            String b = ingr.getName();
             if(a.compareTo(b) > 0) {
                 ingredientList.add(i, ingr);
                 ok = 1;
@@ -42,26 +43,25 @@ public class InterfaceLoop{
     void displayIngredients() { 
         String result = "";
         for (int i = 0; i < ingredientList.size(); i++) {
-            result = "barcode: " + ingredientList.get(i)[0] 
-                    + ", name: " + ingredientList.get(i)[1] 
-                    + ", unit_weight: " + ingredientList.get(i)[2];
+            result = "barcode: " + ingredientList.get(i).getBar() 
+                    + ", name: " + ingredientList.get(i).getName()
+                    + ", unit_weight: " + ingredientList.get(i).getWeight();
             System.out.println(result);
         }
         System.out.println("OK:display_completed");
     }
 
     void makeLocation(String init_name, Integer init_x_coord, Integer init_y_coord, Integer init_space_limit) { 
-        Object[] loc = new Object[] {init_name, init_x_coord, init_y_coord, init_space_limit};
+        Location loc = new Location(init_name, init_x_coord, init_y_coord, init_space_limit);
         locationList.add(loc);
     }
 
     void displayLocations() { 
         String result = "";
         for (int i = 0; i < locationList.size(); i++) {
-            result = "name: " + locationList.get(i)[0] 
-                    + ", (x,y): " + "(" + locationList.get(i)[1] + "," + locationList.get(i)[1] + ")"
-                    //this part has to be changed after the drone part is done
-                    + ", space: " + "[" + locationList.get(i)[3] + " / " + locationList.get(i)[3] + "]"
+            result = "name: " + locationList.get(i).getName() 
+                    + ", (x,y): " + "(" + locationList.get(i).getX() + "," + locationList.get(i).getY() + ")"
+                    + ", space: " + "[" + locationList.get(i).getSpaceLimit() + " / " + locationList.get(i).getRemaining() + "]"
                     + " remaining";
             System.out.println(result);
         }
