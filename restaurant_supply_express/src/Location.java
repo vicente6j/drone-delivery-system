@@ -35,7 +35,10 @@ public class Location {
     public Integer getRemaining() {
         return this.remaining;
     }
-    
+    public void setRemaining(Integer remaining) {
+        this.remaining = remaining;
+    }
+
     public void setName(String newName) {
         this.name = newName;
     }
@@ -70,4 +73,43 @@ public class Location {
         }
         return isValid;
     }
+
+    public static int calculateDistance(String arrival, String departure,ArrayList<Location> locationList ){
+        int x1 = 0;
+        int x2 = 0;
+        int y1 = 0;
+        int y2 = 0;
+        int found  = 0;
+        for (int i = 0; i < locationList.size(); i++) {
+            if (locationList.get(i).getName().equals(arrival)) {
+                x1 = locationList.get(i).x_coor;
+                y1 = locationList.get(i).y_coor;
+                found++;
+            }
+            if (locationList.get(i).getName().equals(departure)) {
+                x2 = locationList.get(i).x_coor;
+                y2 = locationList.get(i).y_coor;
+                found++;
+            }
+        }
+        if (found == 2){
+            return 1 + (int) Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
+        } else{
+            return -1;
+        }
+
+    }
+    public static boolean isSpace(String name, ArrayList<Location> locationList) {
+        boolean isValid = false;
+        for (int i = 0; i < locationList.size(); i++) {
+            if (locationList.get(i).getName().equals(name)) {
+                if (locationList.get(i).getSpaceLimit() > 0){
+                    isValid = true;
+                }
+            }
+        }
+        return isValid;
+    }
+
+
 }

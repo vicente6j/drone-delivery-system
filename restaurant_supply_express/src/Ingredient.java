@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Ingredient {
 
     private String barcode;
@@ -32,5 +34,14 @@ public class Ingredient {
 
     public void setWeight(Integer newWeight) {
         this.weight = newWeight;
+    }
+    public static boolean barcodeUnique(String barcode, ArrayList<Ingredient> ingredients){
+        for (int i = 0; i < ingredients.size(); i++){
+            if (ingredients.get(i).getBar().equals(barcode)){
+                return false;
+            }
+        }
+        return true;
+
     }
 }

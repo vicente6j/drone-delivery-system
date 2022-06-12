@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Restaurant {
     private String name;
     private String location;
@@ -30,5 +32,24 @@ public class Restaurant {
 
     public void setMoneySpent(Integer spent) {
         this.spent = spent;
+    }
+
+    public static String getLocation(String name, ArrayList<Restaurant> restaurantList) {
+        for (int i = 0; i < restaurantList.size(); i++) {
+            if (restaurantList.get(i).getName().equals(name)) {
+                return restaurantList.get(i).getLocation();
+            }
+        }
+        return "";
+    }
+
+    public static boolean nameUnique(String name, ArrayList<Restaurant> restaurants){
+        for (int i = 0; i < restaurants.size(); i++){
+            if ( restaurants.get(i).getName().equals(name)){
+                return false;
+            }
+        }
+        return true;
+
     }
 }

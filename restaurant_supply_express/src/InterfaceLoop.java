@@ -1,6 +1,4 @@
 import java.util.Scanner;
-import java.util.TreeMap;
-
 import java.util.ArrayList;
 
 public class InterfaceLoop{
@@ -11,30 +9,36 @@ public class InterfaceLoop{
     public static ArrayList<Location> locationList = new ArrayList<>();
     public static ArrayList<DeliveryService> deliveryServicesList = new ArrayList<>();
     public static ArrayList<Restaurant> restaurantList = new ArrayList<>();
+    public static ArrayList<Drone> dronesList = new ArrayList<>();
+    public static ArrayList<Payload> payloads = new ArrayList<>();
 
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) { 
         Ingredient newIngredient = new Ingredient(init_barcode, init_name, init_weight);
 
         int index = 0;
         boolean added = false;
-        while (index < ingredientList.size()) {
-            String a = ingredientList.get(index).getName();
-            String b = newIngredient.getName();
-            if(a.compareTo(b) > 0) {
-                ingredientList.add(index, newIngredient);
-                added = true;
-                break;
+        if(Ingredient.barcodeUnique(init_barcode, ingredientList)){
+            while (index < ingredientList.size()) {
+                String a = ingredientList.get(index).getName();
+                String b = newIngredient.getName();
+                if(a.compareTo(b) > 0) {
+                    ingredientList.add(index, newIngredient);
+                    added = true;
+                    break;
+                }
+                index++;
             }
-            index++;
-        }
-        if (!added) {
-            ingredientList.add(ingredientList.size(), newIngredient);
+            if (!added) {
+                ingredientList.add(ingredientList.size(), newIngredient);
+            }
+            System.out.println("OK:change_completed");
+        } else {
+            System.out.println("ERROR:ingredient_already_exists");
         }
         // make_ingredient,saf_spc,saffron,4
         // make_ingredient,iku_sfd,ikura,9
         // make_ingredient,truf_fgs,truffles,6
         
-        System.out.println("OK:change_completed");
     }
 
     void displayIngredients() { 
@@ -50,7 +54,18 @@ public class InterfaceLoop{
 
     void makeLocation(String init_name, Integer init_x_coord, Integer init_y_coord, Integer init_space_limit) { 
         Location loc = new Location(init_name, init_x_coord, init_y_coord, init_space_limit);
-        locationList.add(loc);
+        boolean found = false;
+        for (int i = 0; i < locationList.size(); i++){
+            if(locationList.get(i).getName().equals(init_name)){
+                found = true;
+            }
+        }
+        if(found == false){
+            locationList.add(loc);
+            System.out.println("OK:change_completed");
+        } else{
+            System.out.println("ERROR:location_already_exists");
+        }
     }
 
     void displayLocations() { 
@@ -88,11 +103,16 @@ public class InterfaceLoop{
     }
 
     void makeDeliveryService(String init_name, Integer init_revenue, String located_at) {
-        if (!Location.isValidLocation(located_at, locationList)) {
-            System.out.println("ERROR: The delivery service location is invalid.");
+        if (DeliveryService.nameUnique(init_name, deliveryServicesList)){
+            if (!Location.isValidLocation(located_at, locationList)) {
+                System.out.println("ERROR: The delivery service location is invalid.");
+            } else {
+                DeliveryService newDeliveryService = new DeliveryService(init_name, init_revenue, located_at);
+                deliveryServicesList.add(newDeliveryService);
+                System.out.println("OK:change_completed");
+            }
         } else {
-            DeliveryService newDeliveryService = new DeliveryService(init_name, init_revenue, located_at);
-            deliveryServicesList.add(newDeliveryService);
+            System.out.println("ERROR:service_identifier_already_exist");
         }
     }
 
@@ -106,13 +126,17 @@ public class InterfaceLoop{
     }
 
     void makeRestaurant(String init_name, String located_at) { 
-         if (!Location.isValidLocation(located_at, locationList)) {
-            System.out.println("ERROR: The restaurant location is invalid.");
-        } else {
-            Restaurant newRestaurant = new Restaurant(init_name, located_at);
-            restaurantList.add(newRestaurant);
-        }
-        System.out.println("OK:change_completed");
+         if (Restaurant.nameUnique(init_name, restaurantList)){
+            if (!Location.isValidLocation(located_at, locationList)) {
+                System.out.println("ERROR: The restaurant location is invalid.");
+            } else {
+                Restaurant newRestaurant = new Restaurant(init_name, located_at);
+                restaurantList.add(newRestaurant);
+            }
+            System.out.println("OK:change_completed");
+         } else {
+            System.out.println("ERROR:restaurant_already_exist");
+         }
     }
 
     void displayRestaurants() {
@@ -124,19 +148,157 @@ public class InterfaceLoop{
         System.out.println("OK:display_completed");
     }
 
-    void makeDrone(String service_name, Integer init_tag, Integer init_capacity, Integer init_fuel) { }
+    //All drones are created at the same location as their owning delivery service's home base.
+    // A drone can only be created if there's available space at that location
+    void makeDrone(String service_name, Integer init_tag, Integer init_capacity, Integer init_fuel) {
+        if (Drone.DroneUnique(init_tag, service_name, deliveryServicesList, dronesList)){
+            for (int i = 0; i < deliveryServicesList.size(); i ++){
+                boolean added = false;
+                for (int j = 0; j < locationList.size(); j++){
+                    if (locationList.get(j).getName().equals(deliveryServicesList.get(i).getLocation()) && locationList.get(j).getRemaining() > 0 ){
+                        Drone newDrone = new Drone(service_name, init_tag, init_capacity, init_fuel, locationList.get(j).getName());
+                        dronesList.add(newDrone);
+                        locationList.get(j).setLimit(locationList.get(j).getSpaceLimit() - 1);
+                        added = true;
+                        System.out.println("OK:change_completed");
+                    }
+                }
+                if (added == false){
+                    System.out.println("ERROR:not_enough_space_to_create_new_drone");
+                }
+            }
+        } else {
+            System.out.println("ERROR:drone_identifier_already_exists");
+        }
+    }
 
-    void displayDrones(String service_name) { }
+    void displayDrones(String service_name) {
+        ArrayList<Drone> sorted_dronesList = new ArrayList<>();
+        int index = 0;
+        for (int i = 0; i < dronesList.size(); i++) {
+            Drone currentDrone = dronesList.get(i);
+            if (currentDrone.getService_name().equals(service_name)) {
+                    sorted_dronesList.add(index, currentDrone);
+                }
+            }
+        for (int i = 0; i < sorted_dronesList.size() - 1; i++) {
+            for(int j = i+1; j < sorted_dronesList.size(); j++){
+                if (sorted_dronesList.get(i).getInit_tag() > sorted_dronesList.get(j).getInit_tag()){
+                    Drone aux = sorted_dronesList.get(i);
+                    sorted_dronesList.set(i, sorted_dronesList.get(j));
+                    sorted_dronesList.set(j, aux);
+                }
+            }
+        }
+        for (int i = 0; i < sorted_dronesList.size(); i++) {
+            String result = "tag: " + sorted_dronesList.get(i).getInit_tag() + ", " + "remaining_cap: " + sorted_dronesList.get(i).getInit_capacity() + ", " + "fuel: " + sorted_dronesList.get(i).getInit_fuel() + ", " + "sales: $" + sorted_dronesList.get(i).getSales() + ", "  + "location: " + sorted_dronesList.get(i).getLocation();
+            System.out.println(result);
+        }
+        //if nothing??
+        System.out.println("OK:display_completed");
+     }
 
     void displayAllDrones() { }
 
-    void flyDrone(String service_name, Integer drone_tag, String destination_name) { }
+    void flyDrone(String service_name, Integer drone_tag, String destination_name) {
+        //Remember that a delivery service never wants to leave a drone stranded without enough fuel to return to home base.
+        //Therefore, before a drone moves from its current location, it must have enough fuel to reach the intended destination AND must also have enough fuel to get from the destination back to its home base.
+        //Also, it must ensure that there is enough space at the intended destination.
+        for (int i = 0; i < dronesList.size(); i++){
+            if (dronesList.get(i).getService_name().equals(service_name) && dronesList.get(i).getInit_tag().equals(drone_tag)){
+                if (Location.isValidLocation(destination_name, locationList)){
+                    int destination = Location.calculateDistance(dronesList.get(i).getLocation(), destination_name, locationList);
+                    if (destination * 2 <= dronesList.get(i).getInit_fuel()){
+                        if (Location.isSpace(destination_name, locationList)){
+                            System.out.println("OK:change_completed");
+                            dronesList.get(i).setRemaining_fuel(dronesList.get(i).getRemaining_fuel() - destination * 2);
+                            //adjust spa e remaining
+                        } else{
+                            System.out.println("ERROR:not_enough_space_for_the_drone");
+                        }
+                    } else if (destination <= dronesList.get(i).getInit_fuel() && destination * 2 > dronesList.get(i).getInit_fuel()){
+                        System.out.println("ERROR:not_enough_fuel_to_reach_home_base_from_the_destination");
+                    } else if (destination > dronesList.get(i).getInit_fuel()) {
+                        System.out.println("ERROR:not_enough_fuel_to_reach_the_destination");
+                    }
+                } else {
+                    System.out.println("ERROR:flight_destination_does_not_exist");
 
-    void loadIngredient(String service_name, Integer drone_tag, String barcode, Integer quantity, Integer unit_price) { }
+                }
+            }
+        }
+     }
 
-    void loadFuel(String service_name, Integer drone_tag, Integer petrol) { }
+    void loadIngredient(String service_name, Integer drone_tag, String barcode, Integer quantity, Integer unit_price) {
+        //A number of packages (i.e., quantity) can be loaded onto that drone if - and only if - the drone is located at its service's home base,
+        //and the drone has enough free slots to hold the new packages.
+        if (Ingredient.barcodeUnique(barcode, ingredientList) == false){
+            for (int i = 0 ; i < dronesList.size(); i++){
+                if (dronesList.get(i).getService_name().equals(service_name) && dronesList.get(i).getInit_tag().equals(drone_tag)){
+                    if (dronesList.get(i).getLocation().equals(DeliveryService.getLocation(dronesList.get(i).getService_name(), deliveryServicesList))){
+                        if(dronesList.get(i).getInit_capacity() >= quantity){
+                            dronesList.get(i).setInit_capacity(dronesList.get(i).getInit_capacity()-quantity);
+                            Payload load = new Payload(service_name, drone_tag, barcode, quantity, unit_price);
+                            payloads.add(load);
+                            System.out.println("OK:change_completed");
+                        } else{
+                            System.out.println("ERROR:drone_does_not_have_enough_space");
+                        }
+                    } else{
+                        System.out.println("ERROR:drone_not_located_at_home_base");
+                    }
+                }
+            }
+        } else {
+            System.out.println("ERROR:ingredient_identifier_does_not_exist");
+        }
+     }
 
-    void purchaseIngredient(String restaurant_name, String service_name, Integer drone_tag, String barcode, Integer quantity) { }
+    void loadFuel(String service_name, Integer drone_tag, Integer petrol) {
+        //A drone can be refueled if - and only if - the drone is located at its service's home base.
+        for (int i = 0 ; i < dronesList.size(); i++){
+            if (dronesList.get(i).getService_name().equals(service_name) && dronesList.get(i).getInit_tag().equals(drone_tag)){
+                if (dronesList.get(i).getLocation().equals(DeliveryService.getLocation(dronesList.get(i).getService_name(), deliveryServicesList))){
+                    if(dronesList.get(i).getRemaining_fuel() < dronesList.get(i).getInit_fuel()){
+                        if (dronesList.get(i).getInit_fuel() - dronesList.get(i).getRemaining_fuel() >= petrol) {
+                            dronesList.get(i).setRemaining_fuel(dronesList.get(i).getRemaining_fuel() + petrol); 
+                        } else {
+                            dronesList.get(i).setRemaining_fuel(dronesList.get(i).getInit_fuel()); 
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    void purchaseIngredient(String restaurant_name, String service_name, Integer drone_tag, String barcode, Integer quantity) {
+        //A restaurant can only purchase ingredients from a drone when the drone is at the restaurant's location.
+        //Also, the drone must be carrying enough of the ingredient (i.e., quantity) being requested - otherwise, the order must fail/be refused in its entirety (i.e., no "partial orders").
+        if (Ingredient.barcodeUnique(barcode, ingredientList) == false){
+            for (int i  = 0; i < dronesList.size(); i++){
+                if (dronesList.get(i).getInit_tag().equals(drone_tag) && dronesList.get(i).getService_name().equals(service_name)) {
+                    if(dronesList.get(i).getLocation().equals(Restaurant.getLocation(restaurant_name, restaurantList))){
+                        Payload load = Payload.getPayload(barcode, service_name, drone_tag, payloads);
+                        if(load != null){
+                            if(load.getQuantity() > quantity){
+                                dronesList.get(i).setSales(dronesList.get(i).getSales() +  Payload.getPrice(barcode, service_name, drone_tag, payloads, quantity));
+                                dronesList.get(i).setInit_capacity(dronesList.get(i).getInit_capacity() + quantity);
+                                Payload.updatePayload(barcode, service_name, drone_tag, payloads, quantity);
+                                System.out.println("OK:change_completed");
+                            }
+                        } else{
+                            System.out.println("ERROR:drone_doesn't_have that_ingredient");
+                        }
+                    } else{
+                        System.out.println("ERROR:drone_not_located_at_restaurant");
+                    }
+                }
+            }
+        } else {
+            System.out.println("ERROR:ingredient_identifier_does_not_exist");
+        }
+     }
 
     public void commandLoop() {
         Scanner commandLineInput = new Scanner(System.in);

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class DeliveryService {
     private String name;
     private Integer revenue;
@@ -31,5 +33,23 @@ public class DeliveryService {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+    public static String getLocation(String name, ArrayList<DeliveryService> deliveryServicesList) {
+        for (int i = 0; i < deliveryServicesList.size(); i++) {
+            if (deliveryServicesList.get(i).getName().equals(name)) {
+                return deliveryServicesList.get(i).getLocation();
+            }
+        }
+        return "";
+    }
+
+    public static boolean nameUnique(String name, ArrayList<DeliveryService> deliveryServices){
+        for (int i = 0; i < deliveryServices.size(); i++){
+            if ( deliveryServices.get(i).getName().equals(name)){
+                return false;
+            }
+        }
+        return true;
+
     }
 }
