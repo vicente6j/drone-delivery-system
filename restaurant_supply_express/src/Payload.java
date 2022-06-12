@@ -1,92 +1,63 @@
 import java.util.ArrayList;
 
 public class Payload {
+    private Integer droneTag;
+    private String ingredientBarcode;
+    private Integer ingredientQuantity;
+    private Integer ingredientUnitPrice;
 
-    private String service;
-
-    private Integer drone_tag;
-
-    private String barcode;
-    
-    private Integer quantity;
-
-    private Integer price;
-
-
-
-    public Payload(String service, Integer drone_tag, String barcode, Integer quantity, Integer price) {
-        this.service = service;
-        this.drone_tag = drone_tag;
-        this.barcode = barcode;
-        this.quantity = quantity;
-        this.price = price;
+    public Payload(String serviceName, Integer droneTag, String ingredientBarcode, Integer ingredientQuantity, Integer ingredientUnitPrice) {
+        this.droneTag = droneTag;
+        this.ingredientBarcode = ingredientBarcode;
+        this.ingredientQuantity = ingredientQuantity;
+        this.ingredientUnitPrice = ingredientUnitPrice;
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public Integer getIngredientQuantity() {
+        return ingredientQuantity;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setIngredientQuantity(Integer ingredientQuantity) {
+        this.ingredientQuantity = ingredientQuantity;
     }
 
-    public Integer getPrice() {
-        return price;
+    public Integer getIngredientUnitPrice() {
+        return ingredientUnitPrice;
     }
 
-    public void setPrice(Integer price) {
-        this.price = price;
+    public void setIngredientPrice(Integer ingredientUnitPrice) {
+        this.ingredientUnitPrice = ingredientUnitPrice;
     }
 
-    public String getBarcode() {
-        return barcode;
+    public String getIngredientBarcode() {
+        return ingredientBarcode;
     }
 
-    public void setBarcode(String barcode) {
-        this.barcode = barcode;
+    public void setIngredientBarcode(String barcode) {
+        this.ingredientBarcode = ingredientBarcode;
     }
 
-    public String getService() {
-        return service;
+    public Integer getDroneTag() {
+        return droneTag;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setDroneTag(Integer drone_tag) {
+        this.droneTag = droneTag;
     }
 
-    public Integer getDrone_tag() {
-        return drone_tag;
-    }
-
-    public void setDrone_tag(Integer drone_tag) {
-        this.drone_tag = drone_tag;
-    }
-
-    public static Payload getPayload (String bracode, String service_name, Integer drone_tag, ArrayList<Payload>payloads){
-        for (int i = 0; i < payloads.size(); i++){
-            if(payloads.get(i).getService().equals(service_name) && payloads.get(i).getDrone_tag().equals(drone_tag) && payloads.get(i).getBarcode().equals(bracode)){
-                return payloads.get(i);
-            }
+    public static boolean validatePurchase(Payload payload, int quantityDemanded) {
+        if (payload == null) {
+            System.out.println("ERROR:drone_doesn't_have that_ingredient");
+            return false;
         }
-        return null;
-    }
-
-    public static void updatePayload (String barcode, String service_name, Integer drone_tag, ArrayList<Payload>payloads, Integer quantity){
-        for (int i = 0; i < payloads.size(); i++){
-            if(payloads.get(i).getService().equals(service_name) && payloads.get(i).getDrone_tag().equals(drone_tag) && payloads.get(i).getBarcode().equals(barcode)){
-                payloads.get(i).setQuantity(payloads.get(i).getQuantity() - quantity);
-            }
+        if (payload.getIngredientQuantity() < quantityDemanded) {
+            System.out.println("ERROR:drone_does_not_have_enough_ingredient");
+            return false;
         }
+        return true;
     }
 
-    public static Integer getPrice (String barcode, String service_name, Integer drone_tag, ArrayList<Payload>payloads, Integer quantity){
-        for (int i = 0; i < payloads.size(); i++){
-            if(payloads.get(i).getService().equals(service_name) && payloads.get(i).getDrone_tag().equals(drone_tag) && payloads.get(i).getBarcode().equals(barcode)){
-                 return payloads.get(i).getPrice() * quantity;
-            }
-        }
-        return 0;
+    public static void postSaleUpdate(Payload payload, int quantity) {
+        payload.setIngredientQuantity(payload.getIngredientQuantity() - quantity);
     }
-
-    
 }

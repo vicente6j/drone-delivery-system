@@ -35,6 +35,7 @@ public class Location {
     public Integer getRemaining() {
         return this.remaining;
     }
+    
     public void setRemaining(Integer remaining) {
         this.remaining = remaining;
     }
@@ -51,20 +52,7 @@ public class Location {
         this.y_coor = newY;
     }
 
-    public void setLimit(Integer newSpaceLimit) {
-        this.spaceLimit = newSpaceLimit;
-    }
-
-    //subtracts remaining when drone lands
-    public void droneLand(Integer droneNumber) {
-        if (this.remaining < droneNumber) {
-            System.out.println("Not enough spaces.");
-        } else {
-            this.remaining = this.remaining - droneNumber;
-        }
-    }
-
-    public static boolean isValidLocation(String name, ArrayList<Location> locationList) {
+    public static boolean isValid(String name, ArrayList<Location> locationList) {
         boolean isValid = false;
         for (int i = 0; i < locationList.size(); i++) {
             if (locationList.get(i).getName().equals(name)) {
@@ -74,42 +62,29 @@ public class Location {
         return isValid;
     }
 
-    public static int calculateDistance(String arrival, String departure,ArrayList<Location> locationList ){
-        int x1 = 0;
-        int x2 = 0;
-        int y1 = 0;
-        int y2 = 0;
-        int found  = 0;
+    public static int calculateDistance(String arrival, String departure, ArrayList<Location> locationList ){
+        int arrival_x = 0;
+        int departure_x = 0;
+        int arrival_y = 0;
+        int departure_y = 0;
         for (int i = 0; i < locationList.size(); i++) {
             if (locationList.get(i).getName().equals(arrival)) {
-                x1 = locationList.get(i).x_coor;
-                y1 = locationList.get(i).y_coor;
-                found++;
+                arrival_x = locationList.get(i).x_coor;
+                arrival_y = locationList.get(i).y_coor;
             }
             if (locationList.get(i).getName().equals(departure)) {
-                x2 = locationList.get(i).x_coor;
-                y2 = locationList.get(i).y_coor;
-                found++;
+                departure_x = locationList.get(i).x_coor;
+                departure_y = locationList.get(i).y_coor;
             }
         }
-        if (found == 2){
-            return 1 + (int) Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
-        } else{
-            return -1;
-        }
-
+        return 1 + (int) Math.floor(Math.sqrt(Math.pow(arrival_x - departure_x, 2) + Math.pow(arrival_y - departure_y, 2)));
     }
-    public static boolean isSpace(String name, ArrayList<Location> locationList) {
-        boolean isValid = false;
+    public static boolean hasSpace(String name, ArrayList<Location> locationList) {
         for (int i = 0; i < locationList.size(); i++) {
             if (locationList.get(i).getName().equals(name)) {
-                if (locationList.get(i).getSpaceLimit() > 0){
-                    isValid = true;
-                }
+                return locationList.get(i).getRemaining() > 0;
             }
         }
-        return isValid;
+        return false;
     }
-
-
 }

@@ -1,55 +1,56 @@
 import java.util.ArrayList;
 
 public class Drone {
-    private String service_name;
-    private Integer init_tag;
-    private Integer init_capacity;
-    private Integer init_fuel;
-    private Integer remaining_fuel;
+    private String serviceName;
+    private Integer initTag;
+    private Integer initCapacity;
+    private Integer initFuel;
+    private Integer remainingFuel;
     private Integer sales;
-
+    private ArrayList<Payload> payloads;
     private String location;
 
-    public Drone(String service_name, Integer init_tag, Integer init_capacity, Integer init_fuel, String location) {
-        this.service_name = service_name;
-        this.init_tag = init_tag;
-        this.init_capacity = init_capacity;
-        this.init_fuel= init_fuel;
+    public Drone(String serviceName, Integer initTag, Integer initCapacity, Integer initFuel, String location) {
+        this.serviceName = serviceName;
+        this.initTag = initTag;
+        this.initCapacity = initCapacity;
+        this.initFuel= initFuel;
         this.sales = 0;
-        this.remaining_fuel = init_fuel;
+        this.remainingFuel = initFuel;
         this.location = location;
+        this.payloads = new ArrayList<>();
     }
 
-    public String getService_name() {
-        return service_name;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setService_name(String service_name) {
-        this.service_name = service_name;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
-    public Integer getInit_tag() {
-        return init_tag;
+    public Integer getInitTag() {
+        return initTag;
     }
 
-    public void setInit_tag(Integer init_tag) {
-        this.init_tag = init_tag;
+    public void setInitTag(Integer initTag) {
+        this.initTag = initTag;
     }
 
-    public Integer getInit_fuel() {
-        return init_fuel;
+    public Integer getInitFuel() {
+        return initFuel;
     }
 
-    public void setInit_fuel(Integer init_fuel) {
-        this.init_fuel = init_fuel;
+    public void setInitFuel(Integer initFuel) {
+        this.initFuel = initFuel;
     }
 
-    public Integer getInit_capacity() {
-        return init_capacity;
+    public Integer getInitCapacity() {
+        return initCapacity;
     }
 
-    public void setInit_capacity(Integer init_capacity) {
-        this.init_capacity = init_capacity;
+    public void setInitCapacity(Integer initCapacity) {
+        this.initCapacity = initCapacity;
     }
 
     public String getLocation() {
@@ -67,30 +68,31 @@ public class Drone {
         this.sales = sales;
     }
 
-    public Integer getRemaining_fuel() {
-        return remaining_fuel;
+    public Integer getRemainingFuel() {
+        return remainingFuel;
     }
 
-    public void setRemaining_fuel(Integer remaining_fuel) {
-        this.remaining_fuel = remaining_fuel;
+    public void setRemainingFuel(Integer remainingFuel) {
+        this.remainingFuel = remainingFuel;
     }
 
-    public static boolean DroneUnique(Integer tag, String delivery, ArrayList<DeliveryService> deliveryServices, ArrayList<Drone> drones){
-        for (int i = 0; i < deliveryServices.size(); i++){
-            if (deliveryServices.get(i).getName().equals(delivery)){
-                for (int j = 0; j < drones.size(); j++){
-                    if (drones.get(j).getInit_tag().equals(tag)){
-                        return false;
-                    }
-                }
-                return true;
+    public void addPayload(Payload newPayload) {
+        this.payloads.add(newPayload);
+    }
+
+    public Payload getPayload(String ingredientBarcode) {
+        for (Payload payload : this.payloads) {
+            if (payload.getIngredientBarcode().equals(ingredientBarcode)) {
+                return payload;
             }
         }
-        return false;
-
+        return null;
     }
 
-
-    
+    public static void conductSale(Drone drone, int quantity, int price) {
+        int saleValue = quantity * price;
+        drone.setSales(drone.getSales() + saleValue);
+        drone.setInitCapacity(drone.getInitCapacity() + quantity);
+    }
 }
 
