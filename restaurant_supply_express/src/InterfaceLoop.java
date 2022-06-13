@@ -15,7 +15,7 @@ public class InterfaceLoop{
 
         int index = 0;
         boolean added = false;
-        if(!Ingredient.exists(init_barcode, ingredientList)){
+        if(Ingredient.exists(init_barcode, ingredientList) == null){
             while (index < ingredientList.size()) {
                 String a = ingredientList.get(index).getName();
                 String b = newIngredient.getName();
@@ -181,7 +181,14 @@ public class InterfaceLoop{
         System.out.println("OK:display_completed");
      }
 
-    void displayAllDrones() { }
+    void displayAllDrones() {
+        for (DeliveryService deliveryService : deliveryServicesList){
+            if (deliveryService.getAllDrones().size() > 0){
+                System.out.println("service name [" + deliveryService.getName() + "] drones:");
+                deliveryService.displayDrones();
+            }
+        }
+     }
 
     void flyDrone(String serviceName, Integer droneTag, String destination_name) {
         for (DeliveryService service : this.deliveryServicesList) {
@@ -212,7 +219,8 @@ public class InterfaceLoop{
      }
 
     void loadIngredient(String serviceName, Integer droneTag, String barcode, Integer quantity, Integer unitPrice) {
-        if (Ingredient.exists(barcode, ingredientList)) {
+        if (Ingredient.exists(barcode, ingredientList) != null) {
+            Ingredient ingredientPayload = Ingredient.exists(barcode, ingredientList);
             for (DeliveryService service : this.deliveryServicesList) {
                 if (service.getName().equals(serviceName)) {
                     Drone drone = service.getDrone(droneTag);
@@ -222,9 +230,9 @@ public class InterfaceLoop{
                         break;
                     }
                     if (drone.getLocation().equals(DeliveryService.getLocation(drone.getServiceName(), deliveryServicesList))) {
-                        if (drone.getInitCapacity() >= quantity) {
-                            drone.setInitCapacity(drone.getInitCapacity() - quantity);
-                            Payload newPayload = new Payload(serviceName, droneTag, barcode, quantity, unitPrice);
+                        if (drone.getRemainingCapacity() >= quantity) {
+                            drone.setRemainingCapacity(drone.getRemainingCapacity() - quantity);
+                            Payload newPayload = new Payload(serviceName, droneTag, quantity, unitPrice, ingredientPayload);
                             drone.addPayload(newPayload);
                             System.out.println("OK:change_completed");
                         } else{
@@ -264,7 +272,7 @@ public class InterfaceLoop{
     }
 
     void purchaseIngredient(String restaurantName, String serviceName, Integer droneTag, String barcode, Integer quantity) {
-        if (Ingredient.exists(barcode, ingredientList)) {
+        if (Ingredient.exists(barcode, ingredientList) != null) {
             for (DeliveryService service : this.deliveryServicesList) {
                 if (service.getName().equals(serviceName)) {
                     Drone drone = service.getDrone(droneTag);
@@ -277,10 +285,12 @@ public class InterfaceLoop{
                     if (drone.getLocation().equals(Restaurant.getLocation(restaurantName, restaurantList))) {
                         Payload payload = drone.getPayload(barcode);
                         if (Payload.validatePurchase(payload, quantity)) {
-                            drone.conductSale(drone, payload.getIngredientQuantity(), payload.getIngredientUnitPrice());
+                            Drone.conductSale(drone, payload.getIngredientQuantity(), payload.getIngredientUnitPrice());
+                            Restaurant.makePurchase(restaurantName, payload.getIngredientQuantity(), payload.getIngredientUnitPrice(), restaurantList);
+                            service.setRevenue(service.getRevenue() + payload.getIngredientQuantity() * payload.getIngredientUnitPrice());
                             Payload.postSaleUpdate(payload, quantity);
                             System.out.println("OK:change_completed");
-                        }
+                        } //else what?
                     } else{
                         System.out.println("ERROR:drone_not_located_at_restaurant");
                     }

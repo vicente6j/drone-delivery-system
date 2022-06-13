@@ -4,6 +4,8 @@ public class Drone {
     private String serviceName;
     private Integer initTag;
     private Integer initCapacity;
+    private Integer remainingCapacity;
+
     private Integer initFuel;
     private Integer remainingFuel;
     private Integer sales;
@@ -17,6 +19,7 @@ public class Drone {
         this.initFuel= initFuel;
         this.sales = 0;
         this.remainingFuel = initFuel;
+        this.remainingCapacity = initCapacity;
         this.location = location;
         this.payloads = new ArrayList<>();
     }
@@ -75,14 +78,25 @@ public class Drone {
     public void setRemainingFuel(Integer remainingFuel) {
         this.remainingFuel = remainingFuel;
     }
+    public Integer getRemainingCapacity() {
+        return remainingCapacity;
+    }
+
+    public void setRemainingCapacity(Integer remainingCapacity) {
+        this.remainingCapacity = remainingCapacity;
+    }
 
     public void addPayload(Payload newPayload) {
         this.payloads.add(newPayload);
     }
 
+    public ArrayList<Payload> getAllPayload() {
+        return this.payloads;
+    }
+
     public Payload getPayload(String ingredientBarcode) {
         for (Payload payload : this.payloads) {
-            if (payload.getIngredientBarcode().equals(ingredientBarcode)) {
+            if (payload.getIngredientAssociated().getBar().equals(ingredientBarcode)) {
                 return payload;
             }
         }
