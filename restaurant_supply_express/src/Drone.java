@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+import javax.lang.model.element.Element;
+
 public class Drone {
     private String serviceName;
     private Integer initTag;
@@ -87,7 +89,22 @@ public class Drone {
     }
 
     public void addPayload(Payload newPayload) {
-        this.payloads.add(newPayload);
+        boolean found = false;
+        for(Payload payload: this.payloads){
+            if (payload.getIngredientAssociated().getBar().equals(newPayload.getIngredientAssociated().getBar())) {
+                found = true;
+                if (payload.getIngredientUnitPrice() == newPayload.getIngredientUnitPrice()) {
+                    payload.setIngredientQuantity(payload.getIngredientQuantity() + newPayload.getIngredientQuantity());
+                    System.out.println("OK:change_completed");
+                } else {
+                    System.out.println("OK:the_ingredient_couldn_be_added_as_it_has_a_diffrent_price_than_the_original"); 
+                }
+            }
+        }
+        if (!found) {
+            this.payloads.add(newPayload);
+            System.out.println("OK:change_completed");
+        }
     }
 
     public ArrayList<Payload> getAllPayload() {
@@ -107,6 +124,10 @@ public class Drone {
         int saleValue = quantity * price;
         drone.setSales(drone.getSales() + saleValue);
         drone.setInitCapacity(drone.getInitCapacity() + quantity);
+    }
+
+    public void removePayload(Payload payload) {
+        this.payloads.remove(payload);
     }
 }
 

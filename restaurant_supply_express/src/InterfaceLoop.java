@@ -233,8 +233,7 @@ public class InterfaceLoop{
                         if (drone.getRemainingCapacity() >= quantity) {
                             drone.setRemainingCapacity(drone.getRemainingCapacity() - quantity);
                             Payload newPayload = new Payload(serviceName, droneTag, quantity, unitPrice, ingredientPayload);
-                            drone.addPayload(newPayload);
-                            System.out.println("OK:change_completed");
+                            drone.addPayload(newPayload);//here have to check if we already have it
                         } else{
                             System.out.println("ERROR:drone_does_not_have_enough_space");
                         }
@@ -287,8 +286,8 @@ public class InterfaceLoop{
                         if (Payload.validatePurchase(payload, quantity)) {
                             Drone.conductSale(drone, payload.getIngredientQuantity(), payload.getIngredientUnitPrice());
                             Restaurant.makePurchase(restaurantName, payload.getIngredientQuantity(), payload.getIngredientUnitPrice(), restaurantList);
-                            service.setRevenue(service.getRevenue() + payload.getIngredientQuantity() * payload.getIngredientUnitPrice());
-                            Payload.postSaleUpdate(payload, quantity);
+                            //service.setRevenue(service.getRevenue() + payload.getIngredientQuantity() * payload.getIngredientUnitPrice());
+                            Payload.postSaleUpdate(payload, quantity, drone);//here delete if it goes to zero
                             System.out.println("OK:change_completed");
                         } //else what?
                     } else{

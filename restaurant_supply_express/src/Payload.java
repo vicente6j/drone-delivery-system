@@ -60,7 +60,10 @@ public class Payload {
         return true;
     }
 
-    public static void postSaleUpdate(Payload payload, int quantity) {
+    public static void postSaleUpdate(Payload payload, int quantity, Drone drone) {
         payload.setIngredientQuantity(payload.getIngredientQuantity() - quantity);
+        if (payload.getIngredientQuantity() == 0){
+            drone.removePayload(payload);
+        }
     }
 }
