@@ -42,7 +42,7 @@ public class InterfaceLoop{
     void displayIngredients() { 
         String result = "";
         for (int i = 0; i < ingredientList.size(); i++) {
-            result = "barcode: " + ingredientList.get(i).getBar() 
+            result = "barcode: " + ingredientList.get(i).getBarcode() 
                     + ", name: " + ingredientList.get(i).getName()
                     + ", unit_weight: " + ingredientList.get(i).getWeight();
             System.out.println(result);
@@ -71,7 +71,7 @@ public class InterfaceLoop{
         for (int i = 0; i < locationList.size(); i++) {
             result = "name: " + locationList.get(i).getName() 
                     + ", (x,y): " + "(" + locationList.get(i).getX() + "," + locationList.get(i).getY() + ")"
-                    + ", space: " + "[" + locationList.get(i).getSpaceLimit() + " / " + locationList.get(i).getRemaining() + "]"
+                    + ", space: " + "[" + locationList.get(i).getRemaining() + " / " + locationList.get(i).getSpaceLimit() + "]"
                     + " remaining";
             System.out.println(result);
         }
@@ -80,7 +80,6 @@ public class InterfaceLoop{
 
     
     void checkDistance(String departure_point, String arrival_point) {
-        // Ensure that the departure_point and arrival_point parameters refer to valid Locations
         Location departureLocation = null;
         Location arrivalLocation = null;
         
@@ -197,12 +196,15 @@ public class InterfaceLoop{
 
                 if (Location.isValid(destination_name, locationList)) {
                     int distanceToDestination = Location.calculateDistance(drone.getLocation(), destination_name, locationList);
+                    int distanceToHomeBaseFromDestination = Location.calculateDistance(destination_name, service.getLocation(), locationList);
 
-                    if (drone.getRemainingFuel() >= distanceToDestination * 2) {
+                    if (drone.getRemainingFuel() >= distanceToDestination + distanceToHomeBaseFromDestination) {
                         if (Location.hasSpace(destination_name, locationList)) {
-                            System.out.println("OK:change_completed");
                             drone.setRemainingFuel(drone.getRemainingFuel() - distanceToDestination);
+                            Location.increaseRemaining(drone.getLocation(), locationList);
                             drone.setLocation(destination_name);
+                            Location.decreaseRemaining(destination_name, locationList);
+                            System.out.println("OK:change_completed");
                         } else  {
                             System.out.println("ERROR:not_enough_space_for_the_drone");
                         }
@@ -264,39 +266,50 @@ public class InterfaceLoop{
                         } else {
                             drone.setRemainingFuel(drone.getInitFuel());
                         }
+                        System.out.println("OK:change_completed");
                     }
+                } else {
+                    System.out.println("ERROR:drone_not_located_at_home_base");
                 }
             }
         }
     }
 
     void purchaseIngredient(String restaurantName, String serviceName, Integer droneTag, String barcode, Integer quantity) {
-        if (Ingredient.exists(barcode, ingredientList) != null) {
-            for (DeliveryService service : this.deliveryServicesList) {
-                if (service.getName().equals(serviceName)) {
-                    Drone drone = service.getDrone(droneTag);
+        for (DeliveryService service : this.deliveryServicesList) {
+            if (service.getName().equals(serviceName)) {
+                Drone drone = service.getDrone(droneTag);
 
-                    if (drone == null) {
-                        System.out.println("ERROR:drone_does_not_exist");
-                        break;
-                    }
+                if (drone == null) {
+                    System.out.println("ERROR:drone_does_not_exist");
+                    break;
+                }
 
-                    if (drone.getLocation().equals(Restaurant.getLocation(restaurantName, restaurantList))) {
+                if (!drone.getLocation().equals(Restaurant.getLocation(restaurantName, restaurantList))) {
+                    System.out.println("ERROR:drone_not_located_at_restaurant");
+                    break;
+                }
+
+                boolean payloadFound = false;
+
+                for (Payload currentPayload : drone.getAllPayloads()) {
+                    if (currentPayload.getIngredientAssociated().getBarcode().equals(barcode)) {
+                        payloadFound = true;
                         Payload payload = drone.getPayload(barcode);
+
                         if (Payload.validatePurchase(payload, quantity)) {
-                            Drone.conductSale(drone, payload.getIngredientQuantity(), payload.getIngredientUnitPrice());
+                            drone.conductSale(payload.getIngredientQuantity(), payload.getIngredientUnitPrice());
                             Restaurant.makePurchase(restaurantName, payload.getIngredientQuantity(), payload.getIngredientUnitPrice(), restaurantList);
-                            //service.setRevenue(service.getRevenue() + payload.getIngredientQuantity() * payload.getIngredientUnitPrice());
-                            Payload.postSaleUpdate(payload, quantity, drone);//here delete if it goes to zero
+                            payload.postSaleUpdate(quantity, drone);
                             System.out.println("OK:change_completed");
-                        } //else what?
-                    } else{
-                        System.out.println("ERROR:drone_not_located_at_restaurant");
+                        }
                     }
                 }
+
+                if (!payloadFound) {
+                    System.out.println("ERROR:drone_doesn't_have that_ingredient");
+                }
             }
-        } else {
-            System.out.println("ERROR:ingredient_identifier_does_not_exist");
         }
      }
 

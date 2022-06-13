@@ -49,10 +49,6 @@ public class Payload {
     }
 
     public static boolean validatePurchase(Payload payload, int quantityDemanded) {
-        if (payload == null) {
-            System.out.println("ERROR:drone_doesn't_have that_ingredient");
-            return false;
-        }
         if (payload.getIngredientQuantity() < quantityDemanded) {
             System.out.println("ERROR:drone_does_not_have_enough_ingredient");
             return false;
@@ -60,10 +56,10 @@ public class Payload {
         return true;
     }
 
-    public static void postSaleUpdate(Payload payload, int quantity, Drone drone) {
-        payload.setIngredientQuantity(payload.getIngredientQuantity() - quantity);
-        if (payload.getIngredientQuantity() == 0){
-            drone.removePayload(payload);
+    public void postSaleUpdate(int quantity, Drone drone) {
+        this.setIngredientQuantity(this.getIngredientQuantity() - quantity);
+        if (this.getIngredientQuantity() == 0){
+            drone.removePayload(this);
         }
     }
 }

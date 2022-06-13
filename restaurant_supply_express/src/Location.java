@@ -79,6 +79,7 @@ public class Location {
         }
         return 1 + (int) Math.floor(Math.sqrt(Math.pow(arrival_x - departure_x, 2) + Math.pow(arrival_y - departure_y, 2)));
     }
+
     public static boolean hasSpace(String name, ArrayList<Location> locationList) {
         for (int i = 0; i < locationList.size(); i++) {
             if (locationList.get(i).getName().equals(name)) {
@@ -86,5 +87,21 @@ public class Location {
             }
         }
         return false;
+    }
+
+    public static void increaseRemaining(String locationName, ArrayList<Location> locationsList) {
+        for (Location location : locationsList) {
+            if (location.getName().equals(locationName)) {
+                location.setRemaining(location.getRemaining() + 1);
+            }
+        }
+    }
+
+    public static void decreaseRemaining(String locationName, ArrayList<Location> locationsList) {
+        for (Location location : locationsList) {
+            if (location.getName().equals(locationName)) {
+                location.setRemaining(location.getRemaining() - 1);
+            }
+        }
     }
 }

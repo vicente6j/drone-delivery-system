@@ -56,11 +56,11 @@ public class DeliveryService {
 
     public void displayDrones() {
         for (Drone drone : this.drones.values()) {
-            System.out.println("tag: " + drone.getInitTag() + ", " + "capacity:" + drone.getInitCapacity() + ", " + "remaining_cap: " + drone.getRemainingCapacity() + ", " + "fuel: " + drone.getRemainingFuel() + ", " + "sales: $" + drone.getSales() + ", "  + "location: " + drone.getLocation());
-            if (drone.getAllPayload().size() > 0){
-                for (Payload payload: drone.getAllPayload()){
+            System.out.println("tag: " + drone.getInitTag() + ", " + "capacity: " + drone.getInitCapacity() + ", " + "remaining_cap: " + drone.getRemainingCapacity() + ", " + "fuel: " + drone.getRemainingFuel() + ", " + "sales: $" + drone.getSales() + ", "  + "location: " + drone.getLocation());
+            if (drone.getAllPayloads().size() > 0){
+                for (Payload payload: drone.getAllPayloads()){
                     if (payload.getIngredientQuantity() > 0){
-                        System.out.println("&> " +"barcode: " + payload.getIngredientAssociated().getBar() + ", " + "item_name: " + payload.getIngredientAssociated().getName() + ", " + "total_quantity: " + payload.getIngredientQuantity() + ", " + "unit_cost: " + payload.getIngredientUnitPrice() + ", " + "total_weight: " + payload.getIngredientAssociated().getWeight() * payload.getIngredientQuantity());
+                        System.out.println("&> " +"barcode: " + payload.getIngredientAssociated().getBarcode() + ", " + "item_name: " + payload.getIngredientAssociated().getName() + ", " + "total_quantity: " + payload.getIngredientQuantity() + ", " + "unit_cost: " + payload.getIngredientUnitPrice() + ", " + "total_weight: " + payload.getIngredientAssociated().getWeight() * payload.getIngredientQuantity());
                     }
                 }
             }

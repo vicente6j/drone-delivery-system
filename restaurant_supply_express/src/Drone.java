@@ -91,7 +91,7 @@ public class Drone {
     public void addPayload(Payload newPayload) {
         boolean found = false;
         for(Payload payload: this.payloads){
-            if (payload.getIngredientAssociated().getBar().equals(newPayload.getIngredientAssociated().getBar())) {
+            if (payload.getIngredientAssociated().getBarcode().equals(newPayload.getIngredientAssociated().getBarcode())) {
                 found = true;
                 if (payload.getIngredientUnitPrice() == newPayload.getIngredientUnitPrice()) {
                     payload.setIngredientQuantity(payload.getIngredientQuantity() + newPayload.getIngredientQuantity());
@@ -107,23 +107,23 @@ public class Drone {
         }
     }
 
-    public ArrayList<Payload> getAllPayload() {
+    public ArrayList<Payload> getAllPayloads() {
         return this.payloads;
     }
 
     public Payload getPayload(String ingredientBarcode) {
         for (Payload payload : this.payloads) {
-            if (payload.getIngredientAssociated().getBar().equals(ingredientBarcode)) {
+            if (payload.getIngredientAssociated().getBarcode().equals(ingredientBarcode)) {
                 return payload;
             }
         }
         return null;
     }
 
-    public static void conductSale(Drone drone, int quantity, int price) {
+    public void conductSale(int quantity, int price) {
         int saleValue = quantity * price;
-        drone.setSales(drone.getSales() + saleValue);
-        drone.setInitCapacity(drone.getInitCapacity() + quantity);
+        this.setSales(this.getSales() + saleValue);
+        this.setRemainingCapacity(this.getRemainingCapacity() + quantity);
     }
 
     public void removePayload(Payload payload) {

@@ -12,7 +12,7 @@ public class Ingredient {
         this.weight = initWeight;
     }
 
-    public String getBar() {
+    public String getBarcode() {
         return this.barcode;
     }
 
@@ -37,7 +37,7 @@ public class Ingredient {
     }
     public static Ingredient exists(String barcode, ArrayList<Ingredient> ingredients){
         for (int i = 0; i < ingredients.size(); i++){
-            if (ingredients.get(i).getBar().equals(barcode)){
+            if (ingredients.get(i).getBarcode().equals(barcode)){
                 return ingredients.get(i);
             }
         }
