@@ -246,19 +246,9 @@ public class InterfaceLoop{
                     System.out.println("ERROR:drone_does_not_exist");
                     break;
                 }
-                System.out.println(drone.getLocation() +" "+ service.getLocation());
-                System.out.println(drone.getInitFuel() +" "+ drone.getRemainingFuel());
                 if (drone.getLocation().equals(service.getLocation())) {
-                    if (drone.getRemainingFuel() < drone.getInitFuel()) {
-                        if (drone.getInitFuel() - drone.getRemainingFuel() >= petrol)  {
-                            drone.setRemainingFuel(drone.getRemainingFuel() + petrol);
-                        } else {
-                            drone.setRemainingFuel(drone.getInitFuel());
-                        }
-                        System.out.println("OK:change_completed");
-                    } else {
-                        System.out.println("ERROR:the_drone_is_full");
-                    }
+                    drone.setRemainingFuel(drone.getRemainingFuel() + petrol);
+                    System.out.println("OK:change_completed");
                 } else {
                     System.out.println("ERROR:drone_not_located_at_home_base");
                 }
