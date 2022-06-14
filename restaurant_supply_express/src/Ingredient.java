@@ -44,4 +44,8 @@ public class Ingredient {
         return null;
     }
 
+    public String toString() {
+        return "barcode: " + this.getBarcode() + ", name: " + this.getName() + ", unit_weight: " + this.getWeight();
+    }
+
 }

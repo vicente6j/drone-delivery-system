@@ -129,5 +129,9 @@ public class Drone {
     public void removePayload(Payload payload) {
         this.payloads.remove(payload);
     }
+
+    public String toString() {
+        return "tag: " + this.getInitTag() + ", " + "capacity: " + this.getInitCapacity() + ", " + "remaining_cap: " + this.getRemainingCapacity() + ", " + "fuel: " + this.getRemainingFuel() + ", " + "sales: $" + this.getSales() + ", "  + "location: " + this.getLocation();
+    }
 }
 

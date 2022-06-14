@@ -104,4 +104,8 @@ public class Location {
             }
         }
     }
+
+    public String toString() {
+        return "name: " + this.getName() + ", (x,y): " + "(" + this.getX() + "," + this.getY() + ")" + ", space: " + "[" + this.getRemaining() + " / " + this.getSpaceLimit() + "]" + " remaining";
+    }
 }

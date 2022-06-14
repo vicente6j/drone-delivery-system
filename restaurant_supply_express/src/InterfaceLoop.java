@@ -33,19 +33,12 @@ public class InterfaceLoop{
         } else {
             System.out.println("ERROR:ingredient_already_exists");
         }
-        // make_ingredient,saf_spc,saffron,4
-        // make_ingredient,iku_sfd,ikura,9
-        // make_ingredient,truf_fgs,truffles,6
-        
     }
 
     void displayIngredients() { 
         String result = "";
         for (int i = 0; i < ingredientList.size(); i++) {
-            result = "barcode: " + ingredientList.get(i).getBarcode() 
-                    + ", name: " + ingredientList.get(i).getName()
-                    + ", unit_weight: " + ingredientList.get(i).getWeight();
-            System.out.println(result);
+            System.out.println(ingredientList.get(i));
         }
         System.out.println("OK:display_completed");
     }
@@ -69,11 +62,7 @@ public class InterfaceLoop{
     void displayLocations() { 
         String result = "";
         for (int i = 0; i < locationList.size(); i++) {
-            result = "name: " + locationList.get(i).getName() 
-                    + ", (x,y): " + "(" + locationList.get(i).getX() + "," + locationList.get(i).getY() + ")"
-                    + ", space: " + "[" + locationList.get(i).getRemaining() + " / " + locationList.get(i).getSpaceLimit() + "]"
-                    + " remaining";
-            System.out.println(result);
+            System.out.println(locationList.get(i));
         }
         System.out.println("OK:display_completed");
     }
@@ -139,9 +128,7 @@ public class InterfaceLoop{
 
     void displayRestaurants() {
         for (int i = 0; i < restaurantList.size(); i++) {
-            Restaurant currentRestaurant = restaurantList.get(i);
-            String result = "name: " + currentRestaurant.getName() + ", " + "money_spent: $" + currentRestaurant.getMoneySpent() + ", " + "location: " + currentRestaurant.getLocation();
-            System.out.println(result);
+            System.out.println(restaurantList.get(i));
         }
         System.out.println("OK:display_completed");
     }

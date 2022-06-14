@@ -61,4 +61,8 @@ public class Restaurant {
         return true;
 
     }
+
+    public String toString() {
+        return "name: " + this.getName() + ", " + "money_spent: $" + this.getMoneySpent() + ", " + "location: " + this.getLocation();
+    }
 }

@@ -62,4 +62,8 @@ public class Payload {
             drone.removePayload(this);
         }
     }
+
+    public String toString() {
+        return "&> " +"barcode: " + this.getIngredientAssociated().getBarcode() + ", " + "item_name: " + this.getIngredientAssociated().getName() + ", " + "total_quantity: " + this.getIngredientQuantity() + ", " + "unit_cost: " + this.getIngredientUnitPrice() + ", " + "total_weight: " + this.getIngredientAssociated().getWeight() * this.getIngredientQuantity();
+    }
 }
