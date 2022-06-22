@@ -6,12 +6,14 @@ public class DeliveryService {
     private Integer revenue;
     private String location;
     private HashMap<Integer, Drone> drones;
+    private ArrayList<Person> employees;
 
     public DeliveryService(String name, Integer revenue, String location) {
         this.name = name;
         this.revenue = revenue;
         this.location = location;
         this.drones = new HashMap<>();
+        this.employees = new ArrayList<Person>();
     }
 
     public String getName() {
@@ -24,6 +26,14 @@ public class DeliveryService {
 
     public String getLocation() {
         return this.location;
+    }
+
+    public ArrayList<Person> getEmployees() {
+        return this.employees;
+    }
+
+    public HashMap<Integer, Drone> getAllDrones( ) {
+        return this.drones;
     }
 
     public void setName(String name) {
@@ -44,10 +54,6 @@ public class DeliveryService {
 
     public void addDrone(Drone drone) {
         this.drones.put(drone.getInitTag(), drone);
-    }
-
-    public HashMap<Integer, Drone> getAllDrones( ) {
-        return drones;
     }
 
     public Drone getDrone(Integer droneTag) {
@@ -83,6 +89,32 @@ public class DeliveryService {
             }
         }
         return false;
-
     }
+
+    //––––––––––phase 3 new methods
+
+    public String hire_worker(Person p) {
+        if(p instanceof Manager) {
+            return "ERROR:employee_can't_be_hired";
+        } else if(p instanceof Pilot) {
+            if(((Pilot)p).pilotingFor(this)) {
+                return "ERROR:person_piloting_can't_be_hired";
+            } else {
+                p.setEmployed(true);
+                p.getEmployedIn().add(this);
+                this.employees.add(p);
+                return "OK:new_employee_has_been_hired";
+            }
+        } else {
+            p.setEmployed(true);
+            p.getEmployedIn().add(this);
+            this.employees.add(p);
+            return "OK:new_employee_has_been_hired";
+        }
+    }
+
+
+
+
+
 }

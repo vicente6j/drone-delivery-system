@@ -1,5 +1,6 @@
-import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Collections;
 
 public class InterfaceLoop{
 
@@ -9,6 +10,7 @@ public class InterfaceLoop{
     public static ArrayList<Location> locationList = new ArrayList<>();
     public static ArrayList<DeliveryService> deliveryServicesList = new ArrayList<>();
     public static ArrayList<Restaurant> restaurantList = new ArrayList<>();
+    public static ArrayList<Person> personsList = new ArrayList<>();
 
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) { 
         Ingredient newIngredient = new Ingredient(init_barcode, init_name, init_weight);
@@ -36,7 +38,6 @@ public class InterfaceLoop{
     }
 
     void displayIngredients() { 
-        String result = "";
         for (int i = 0; i < ingredientList.size(); i++) {
             System.out.println(ingredientList.get(i));
         }
@@ -299,6 +300,67 @@ public class InterfaceLoop{
         }
      }
 
+     //–––––––––––––––––––––––phase 3 new methods
+
+
+     void makePerson(String init_username, String init_fname, String init_lname, Integer init_year, Integer init_month, Integer init_date, String init_address) {
+        boolean validUser = true;
+        for (Person p : personsList) {
+            if(p.getUsername().equals(init_username)) {
+                System.out.println("ERROR:username_exists");
+                validUser = false;
+                break;
+            }
+        }
+        if(validUser) {
+            int index = 0;
+            boolean added = false;
+            Person per = new Person(init_username, init_fname, init_lname, init_year, init_month, init_date, init_address);
+            while (index < personsList.size()) {
+                String a = personsList.get(index).getUsername();
+                String b = per.getUsername();
+                if (a.compareTo(b) > 0) {
+                    personsList.add(index, per);
+                    added = true;
+                    break;
+                }
+                index++;
+            }
+            if (!added) {
+                personsList.add(personsList.size(), per);
+            }
+            System.out.println("OK:person_created");
+        }
+     }
+
+     void displayPersons() {
+        for(Person p: personsList) {
+            System.out.println(p);
+        }
+        System.out.println("OK:display_completed");
+     }
+
+     void hireWorker(String service_name, String user_name) {
+        DeliveryService ds = null;
+        Person p = null;
+        for(DeliveryService d: deliveryServicesList) {
+            if(d.getName().equals(service_name)) {
+                ds = d;
+                break;
+            }
+        }
+        for(Person per: personsList) {
+            if(per.getUsername().equals(user_name)) {
+                p = per;
+                break;
+            }
+        }
+        String result = ds.hire_worker(p);
+        System.out.println(result);
+     }
+    
+     //–––––––––––––––––––––––commandLoop() 
+
     public void commandLoop() {
         Scanner commandLineInput = new Scanner(System.in);
         String wholeInputLine;
@@ -363,6 +425,15 @@ public class InterfaceLoop{
                 } else if (tokens[0].equals("purchase_ingredient")) {
                     purchaseIngredient(tokens[1], tokens[2], Integer.parseInt(tokens[3]), tokens[4], Integer.parseInt(tokens[5]));
 
+                } else if (tokens[0].equals("make_person")) {
+                    makePerson(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]), Integer.parseInt(tokens[5]), Integer.parseInt(tokens[6]), tokens[7]);
+
+                } else if (tokens[0].equals("display_persons")) {
+                    displayPersons();
+
+                } else if (tokens[0].equals("hire_worker")) {
+                    hireWorker(tokens[1], tokens[2]);
+                   
                 } else if (tokens[0].equals("stop")) {
                     System.out.println("stop acknowledged");
                     break;
