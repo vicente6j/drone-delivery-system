@@ -1,7 +1,5 @@
 import java.util.ArrayList;
 
-import javax.lang.model.element.Element;
-
 public class Drone {
     private String serviceName;
     private Integer initTag;

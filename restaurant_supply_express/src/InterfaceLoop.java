@@ -1,6 +1,8 @@
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Collections;
+import java.util.Date;
 
 public class InterfaceLoop{
 
@@ -11,6 +13,7 @@ public class InterfaceLoop{
     public static ArrayList<DeliveryService> deliveryServicesList = new ArrayList<>();
     public static ArrayList<Restaurant> restaurantList = new ArrayList<>();
     public static ArrayList<Person> personsList = new ArrayList<>();
+    public static ArrayList<Pilot> pilotsList = new ArrayList<>();
 
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) { 
         Ingredient newIngredient = new Ingredient(init_barcode, init_name, init_weight);
@@ -194,6 +197,7 @@ public class InterfaceLoop{
                             drone.setLocation(destination_name);
                             Location.decreaseRemaining(destination_name, locationList);
                             System.out.println("OK:change_completed");
+                            //increment pilot's experience
                         } else  {
                             System.out.println("ERROR:not_enough_space_for_the_drone");
                         }
@@ -315,7 +319,9 @@ public class InterfaceLoop{
         if(validUser) {
             int index = 0;
             boolean added = false;
-            Person per = new Person(init_username, init_fname, init_lname, init_year, init_month, init_date, init_address);
+            Date date_format = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat(init_year + "-" + init_month + "-" + init_date);
+            Person per = new Person(init_username, init_fname, init_lname,formatter.format(date_format), init_address, new ArrayList<DeliveryService>());
             while (index < personsList.size()) {
                 String a = personsList.get(index).getUsername();
                 String b = per.getUsername();
@@ -355,10 +361,87 @@ public class InterfaceLoop{
                 break;
             }
         }
-        String result = ds.hire_worker(p);
-        System.out.println(result);
+        if (ds!= null & p !=null){
+            String result = ds.hire_worker(p);
+            System.out.println(result);
+            } else {
+                System.out.println("ERROR: the_values_introduced_are_not_valid");
+            }
      }
-    
+
+
+     void fireWorker(String service_name, String user_name) { 
+        DeliveryService ds = null;
+        Person p = null;
+        for(DeliveryService d: deliveryServicesList) {
+            if(d.getName().equals(service_name)) {
+                ds = d;
+                break;
+            }
+        }
+        for(Person per: personsList) {
+            if(per.getUsername().equals(user_name)) {
+                p = per;
+                break;
+            }
+        }
+        if (ds!= null & p !=null){
+        String result = ds.fire_worker(p);
+        System.out.println(result);
+        } else {
+            System.out.println("ERROR: the_values_introduced_are_not_valid");
+        }
+     }
+     void appointManager(String service_name, String user_name) {
+        DeliveryService ds = null;
+        Person p = null;
+        for(DeliveryService d: deliveryServicesList) {
+            if(d.getName().equals(service_name)) {
+                ds = d;
+                break;
+            }
+        }
+        for(Person per: personsList) {
+            if(per.getUsername().equals(user_name)) {
+                p = per;
+                break;
+            }
+        }
+        if (ds!= null & p !=null){
+        String result = ds.appoint_manager(p);
+        System.out.println(result);
+        } else {
+            System.out.println("ERROR: the_values_introduced_are_not_valid");
+        }
+      }
+      void trainPilot(String service_name, String user_name, String init_license, Integer init_experience) {
+        DeliveryService ds = null;
+        Person p = null;
+        for(DeliveryService d: deliveryServicesList) {
+            if(d.getName().equals(service_name)) {
+                ds = d;
+                break;
+            }
+        }
+        for(Person per: personsList) {
+            if(per.getUsername().equals(user_name)) {
+                p = per;
+                break;
+            }
+        }
+        if (ds!= null & p !=null){
+        String result = ds.train_pilot(p, init_license, init_experience);
+        if (result.equals("OK:pilot_has_been_trained")){
+            Pilot pilot = new Pilot(ds.getName(), p.getUsername(), p.getFname(), p.getLname(), p.getDate(), p.getAddress(),p.getEmployedIn(), init_license, init_experience);
+            personsList.remove(p);
+            personsList.add((Person)pilot);
+            pilotsList.add(pilot);
+        }
+        System.out.println(result);
+        } else {
+            System.out.println("ERROR: the_values_introduced_are_not_valid");
+        }
+       }
      //–––––––––––––––––––––––commandLoop() 
 
     public void commandLoop() {
@@ -433,7 +516,13 @@ public class InterfaceLoop{
 
                 } else if (tokens[0].equals("hire_worker")) {
                     hireWorker(tokens[1], tokens[2]);
-                   
+                } else if (tokens[0].equals("fire_worker")) {
+                    fireWorker(tokens[1], tokens[2]);
+                } else if (tokens[0].equals("appoint_manager")) {
+                    appointManager(tokens[1], tokens[2]); 
+                } else if (tokens[0].equals("train_pilot")) {
+                    trainPilot(tokens[1], tokens[2], tokens[3], 
+                    Integer.parseInt(tokens[4]));  
                 } else if (tokens[0].equals("stop")) {
                     System.out.println("stop acknowledged");
                     break;
