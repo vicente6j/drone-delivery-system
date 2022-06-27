@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 
 public class Drone {
+
     private String serviceName;
     private Integer initTag;
     private Integer initCapacity;
@@ -12,6 +13,9 @@ public class Drone {
     private ArrayList<Payload> payloads;
     private String location;
 
+    private Pilot appointedPilot;
+    private Drone leader;
+
     public Drone(String serviceName, Integer initTag, Integer initCapacity, Integer initFuel, String location) {
         this.serviceName = serviceName;
         this.initTag = initTag;
@@ -22,6 +26,8 @@ public class Drone {
         this.remainingCapacity = initCapacity;
         this.location = location;
         this.payloads = new ArrayList<>();
+        this.appointedPilot = null;
+        this.leader = null;
     }
 
     public String getServiceName() {
@@ -63,6 +69,7 @@ public class Drone {
     public void setLocation(String location) {
         this.location = location;
     }
+
     public Integer getSales() {
         return sales;
     }
@@ -78,6 +85,7 @@ public class Drone {
     public void setRemainingFuel(Integer remainingFuel) {
         this.remainingFuel = remainingFuel;
     }
+
     public Integer getRemainingCapacity() {
         return remainingCapacity;
     }
@@ -126,6 +134,31 @@ public class Drone {
 
     public void removePayload(Payload payload) {
         this.payloads.remove(payload);
+    }
+
+    public void setAppointedPilot(Pilot p) {
+        this.appointedPilot = p;
+    }
+
+    public Pilot getAppointedPilot() {
+        return appointedPilot;
+    }
+
+    public void setLeader(Drone d) {
+        this.leader = d;
+    }
+
+    public Drone getLeader() {
+        return leader;
+    }
+
+    public void joinSwarm(Drone d) {
+        this.setAppointedPilot(null);
+        this.setLeader(d);
+    }
+
+    public void leaveSwarm() {
+        this.setLeader(null);
     }
 
     public String toString() {
