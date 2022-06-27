@@ -176,9 +176,73 @@ public class DeliveryService {
         }
         return "ERROR:employee_does_not_work_for_this_service";
     }
+
+    public String appointPilot(Pilot pilot, Integer drone_tag) {
+        Drone d = getDrone(drone_tag);
+        if (d == null) {
+            return "ERROR:drone_does_not_exist_at_this_delivery_service";
+        }
+        String str = null;
+        if (employees.contains(pilot)) {
+            if (pilot.getLicenseID() != null) {
+                if (pilot.getManaging().equals("")) {
+                    if (pilot.getEmployedIn().size() <= 1) {
+                        if (d.getAppointedPilot() != null) {
+                            d.getAppointedPilot().subtractAppointedDrone(d);
+                        }
+                        pilot.addAppointedDrone(d);
+                        return "OK:pilot_has_been_appointed_to_drone";
+                    } else {
+                        str = "ERROR:employee_is_working_at_more_than_one_company";
+                    }
+                } else {
+                    str = "ERROR:employee_is_working_as_a_manager";
+                }
+            } else {
+                str = "ERROR:employee_does_not_have_valid_pilot_license";
+            }
+        } else {
+            str = "ERROR:employee_is_not_working_for_this_service";
+        }
+        return str;
+    }
+    
+    public String joinSwarm(Integer lead_drone_tag, Integer swarm_drone_tag) {
+        Drone lead_drone = getDrone(lead_drone_tag);
+        Drone swarm_drone = getDrone(swarm_drone_tag);
+        String str = null;
+        if (lead_drone != null && swarm_drone != null) {
+            if (lead_drone.getLocation().equals(swarm_drone.getLocation())) {
+                if (lead_drone.getAppointedPilot() != null) {
+                    swarm_drone.joinSwarm(lead_drone);
+                    str = "OK:swarm_drone_has_joined_lead_drone";
+                } else {
+                    str = "ERROR:lead_drone_has_no_pilot";
+                }
+            } else {
+                str = "ERROR:drones_have_different_locations";
+            }
+        } else {
+            str = "ERROR:one_or_both_drones_do_not_exist_at_this_delivery_service";
+        }
+        return str;
+    }
+
+    public String leaveSwarm(Integer swarm_drone_tag) {
+        Drone swarm_drone = getDrone(swarm_drone_tag);
+        String str = null;
+        if (swarm_drone != null) {
+            swarm_drone.leaveSwarm();
+            str = "OK:swarm_drone_has_left_swarm";
+        } else {
+            str = "ERROR:drone_does_not_exist_at_this_delivery_service";
+        }
+        return str;
+    }
+
     private boolean works_for(Person p){
         for (Person employee: employees){
-            if( employee.getUsername().equals(p.getUsername())){
+            if(employee.getUsername().equals(p.getUsername())){
                 return true;
             }
         }
