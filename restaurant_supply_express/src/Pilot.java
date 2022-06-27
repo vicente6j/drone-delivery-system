@@ -1,17 +1,18 @@
 import java.util.ArrayList;
 
 public class Pilot extends Person {
-    //private boolean licensed;
+
     private String licenseID;
     private String employedby;
     private Integer experience;
+    private ArrayList<Drone> controlledDrones;
 
     public Pilot(String service_name, String user_name,String fname, String lname, String date, String address,ArrayList<DeliveryService> employedIn, String init_license, Integer init_experience) {
         super(user_name, fname, lname,date, address,employedIn);
-        //this.licensed = false;
         this.licenseID = init_license;
         this.employedby = service_name;
         this.experience = init_experience;
+        controlledDrones = new ArrayList<Drone>();
     }
 
     public String getLicenseID() {
@@ -37,6 +38,7 @@ public class Pilot extends Person {
     public void setEmployedby(String employedby) {
         this.employedby = employedby;
     }
+
     public Integer getExperience() {
         return experience;
     }
@@ -45,5 +47,15 @@ public class Pilot extends Person {
         this.experience = experience;
     }
 
+    public void addAppointedDrone(Drone d) {
+        controlledDrones.add(d);
+    }
 
+    public void subtractAppointedDrone(Drone d) {
+        controlledDrones.pop(d);
+    }
+
+    public ArrayList<Drone> getControlledDrones() {
+        return controlledDrones;
+    }
 }
