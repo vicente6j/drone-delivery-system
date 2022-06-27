@@ -182,7 +182,7 @@ public class InterfaceLoop{
      }
 
     void flyDrone(String service_name, Integer drone_tag, String destination_name) {
-        for (DeliveryService service : this.deliveryServicesList) {
+        for (DeliveryService service : deliveryServicesList) {
             if (service.getName().equals(service_name)) {
                 Drone drone = service.getDrone(drone_tag);
 
@@ -414,6 +414,7 @@ public class InterfaceLoop{
             System.out.println("ERROR: the_values_introduced_are_not_valid");
         }
       }
+
       void trainPilot(String service_name, String user_name, String init_license, Integer init_experience) {
         DeliveryService ds = null;
         Person p = null;
@@ -442,6 +443,63 @@ public class InterfaceLoop{
             System.out.println("ERROR: the_values_introduced_are_not_valid");
         }
        }
+
+    void appointPilot(String service_name, String user_name, Integer drone_tag) {
+        DeliveryService ds = null;
+        Pilot p = null;
+        for (DeliveryService d : deliveryServicesList) {
+            if (d.getName().equals(service_name)) {
+                ds = d;
+                break;
+            }
+        }
+        for (Pilot per : pilotsList) {
+            if (per.getUsername().equals(user_name)) {
+                p = per;
+                break;
+            }
+        }
+        if (ds != null && p != null) {
+            String result = ds.appointPilot(p, drone_tag);
+            System.out.println(result);
+        } else {
+            System.out.println("ERROR:the_values_introduced_are_not_valid");
+        }
+    }
+
+    void joinSwarm(String service_name, Integer lead_drone_tag, Integer swarm_drone_tag) {
+        DeliveryService ds = null;
+        for (DeliveryService d : deliveryServicesList) {
+            if (d.getName().equals(service_name)) {
+                ds = d;
+                break;
+            }
+        }
+        if (ds != null) {
+            String result = ds.joinSwarm(lead_drone_tag, swarm_drone_tag);
+            System.out.println(result);
+        } else {
+            System.out.println("ERROR:the_values_introduced_are_not_valid");
+        }
+    }
+
+    void leaveSwarm(String service_name, Integer swarm_drone_tag) {
+        DeliveryService ds = null;
+        for (DeliveryService d : deliveryServicesList) {
+            if (d.getName().equals(service_name)) {
+                ds = d;
+                break;
+            }
+        }
+        if (ds != null) {
+            String result = ds.leaveSwarm(swarm_drone_tag);
+            System.out.println(result);
+        } else {
+            System.out.println("ERROR:the_values_introduced_are_not_valid");
+        }
+    }
+
+
      //–––––––––––––––––––––––commandLoop() 
 
     public void commandLoop() {
