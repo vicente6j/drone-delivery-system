@@ -182,36 +182,19 @@ public class InterfaceLoop{
      }
 
     void flyDrone(String service_name, Integer drone_tag, String destination_name) {
-        for (DeliveryService service : deliveryServicesList) {
-            if (service.getName().equals(service_name)) {
-                Drone drone = service.getDrone(drone_tag);
-
-                if (Location.isValid(destination_name, locationList)) {
-                    int distanceToDestination = Location.calculateDistance(drone.getLocation(), destination_name, locationList);
-                    int distanceToHomeBaseFromDestination = Location.calculateDistance(destination_name, service.getLocation(), locationList);
-
-                    if (drone.getRemainingFuel() >= distanceToDestination + distanceToHomeBaseFromDestination) {
-                        if (Location.hasSpace(destination_name, locationList)) {
-                            drone.setRemainingFuel(drone.getRemainingFuel() - distanceToDestination);
-                            Location.increaseRemaining(drone.getLocation(), locationList);
-                            drone.setLocation(destination_name);
-                            Location.decreaseRemaining(destination_name, locationList);
-                            System.out.println("OK:change_completed");
-                            //increment pilot's experience
-                        } else  {
-                            System.out.println("ERROR:not_enough_space_for_the_drone");
-                        }
-                    } else if (drone.getRemainingFuel() >= distanceToDestination) {
-                        System.out.println("ERROR:not_enough_fuel_to_reach_home_base_from_the_destination");
-                    } else if (drone.getRemainingFuel() < distanceToDestination) {
-                        System.out.println("ERROR:not_enough_fuel_to_reach_the_destination");
-                    }
-                } else {
-                    System.out.println("ERROR:flight_destination_does_not_exist");
-                }
+        DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+        boolean destinationValid = Location.isValid(destination_name, locationList);
+        if (ds != null) {
+            if (destinationValid) {
+                String result = ds.flyDrone(drone_tag, destination_name);
+                System.out.println(result);
+            } else {
+                System.out.println("ERROR:flight_destination_does_not_exist");
             }
+        } else {
+            System.out.println("service_does_not_exist");
         }
-     }
+    }
 
     void loadIngredient(String service_name, Integer drone_tag, String barcode, Integer quantity, Integer unit_price) {
         Ingredient i = Ingredient.exists(barcode, ingredientList);
