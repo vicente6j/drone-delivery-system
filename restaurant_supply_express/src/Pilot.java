@@ -58,4 +58,15 @@ public class Pilot extends Person {
     public ArrayList<Drone> getControlledDrones() {
         return controlledDrones;
     }
+
+    public static Pilot getPilotByName(String user_name, ArrayList<DeliveryService> pilotsList) {
+        Pilot pilot = null;
+        for (Pilot p : pilotsList) {
+            if (pilot.getUserName().equals(user_name)) {
+                pilot = p;
+                break;
+            }
+        }
+        return pilot;
+    }
 }
