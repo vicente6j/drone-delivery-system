@@ -77,6 +77,9 @@ public class Location {
                 departure_y = locationList.get(i).y_coor;
             }
         }
+        if (arrival.equals(departure)) {
+            return 0;
+        }
         return 1 + (int) Math.floor(Math.sqrt(Math.pow(arrival_x - departure_x, 2) + Math.pow(arrival_y - departure_y, 2)));
     }
 
@@ -84,6 +87,15 @@ public class Location {
         for (int i = 0; i < locationList.size(); i++) {
             if (locationList.get(i).getName().equals(name)) {
                 return locationList.get(i).getRemaining() > 0;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasSpaceForAll(String name, ArrayList<Location> locationList, Integer numDrones) {
+        for (int i = 0; i < locationList.size(); i++) {
+            if (locationList.get(i).getName().equals(name)) {
+                return locationList.get(i).getRemaining() > numDrones;
             }
         }
         return false;
