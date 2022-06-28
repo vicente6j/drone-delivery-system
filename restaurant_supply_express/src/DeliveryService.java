@@ -78,9 +78,9 @@ public class DeliveryService {
                 System.out.println("&> pilot: " + drone.getAppointedPilot().getUsername());
             }
             String result = "";
-            if (drone.getSwarmDrones()!= null && drone.getSwarmDrones().size() > 0){
-                result = "&> drone is directing this swarm: [ drone tags |";
-                for (Drone swarm_D : drone.getSwarmDrones()){
+            if (drone.getSwarmDrones()!= null && drone.getSwarmDrones().size() > 0) {
+                result = "&> drone is directing this swarm: [ drone tags | ";
+                for (Drone swarm_D : drone.getSwarmDrones()) {
                             result += swarm_D.getInitTag() + " | ";
                 }
                 result = result.substring(0, result.length() - 2) + "]";
@@ -248,7 +248,7 @@ public class DeliveryService {
             Drone swarm_drone_leader = getDrone(swarm_drone.getLeader().getInitTag());
             swarm_drone_leader.leaveSwarmDrones(swarm_drone);
             swarm_drone.leaveSwarm();
-            str = "OK:swarm_drone_has_left_swarm";
+            str = "OK:change_completed";
         } else {
             str = "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
@@ -349,6 +349,55 @@ public class DeliveryService {
             str = "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
         return str; 
+    }
+    
+    public String flyDrone(Integer drone_tag, String destination_name, ArrayList<Location> locationList) {
+        Drone flyingDrone = getDrone(drone_tag);
+        String str = null;
+        boolean validFlight = false;
+        /* Validates identity of leading drone and iterates over a new ArrayList<Drone> including leading drone and swarm
+        ** to see if whole coup passes conditions */ 
+        if (flyingDrone != null) {
+            if (flyingDrone.getAppointedPilot() != null) {
+                ArrayList<Drone> coup = flyingDrone.getSwarmDrones();
+                coup.add(flyingDrone);
+                for (int i = 0; i < coup.size(); i++) {
+                    int distanceTo = Location.calculateDistance(coup.get(i).getLocation(), destination_name, locationList);
+                    int distanceBack = Location.calculateDistance(destination_name, coup.get(i).getLocation(), locationList);
+                    if (coup.get(i).getRemainingFuel() >= distanceTo + distanceBack) {
+                        if (Location.hasSpaceForAll(destination_name, locationList, coup.size())) {
+                            validFlight = true;
+                            str = "OK:change_complete";
+                        } else {
+                            str = "ERROR:not_enough_space_to_maneuver_the_swarm_to_that_location";
+                        }
+                    } else if (coup.get(i).getRemainingFuel() >= distanceTo) {
+                        str = "ERROR:not_enough_fuel_to_reach_home_base_from_the_destination";
+                    } else if (coup.get(i).getRemainingFuel() < distanceTo) {
+                        str = "ERROR:not_enough_fuel_to_reach_the_destination";
+                    }
+                }
+                coup.remove(flyingDrone);
+            } else {
+                str = "ERROR:drone_is_a_swarm_drone";
+            }
+        } else {
+            str = "ERROR:drone_does_not_exist_at_this_delivery_service";
+        }
+        // After validating all conditions first, iterates over coup and updates all drones
+        if (validFlight) {
+            ArrayList<Drone> coup = flyingDrone.getSwarmDrones();
+            coup.add(flyingDrone);
+            for (int i = 0; i < coup.size(); i++) {
+                int distanceTo = Location.calculateDistance(coup.get(i).getLocation(), destination_name, locationList);
+                coup.get(i).setRemainingFuel(coup.get(i).getRemainingFuel() - distanceTo);
+                Location.increaseRemaining(coup.get(i).getLocation(), locationList);
+                coup.get(i).setLocation(destination_name);
+                Location.decreaseRemaining(destination_name, locationList);
+            }
+            coup.remove(flyingDrone);
+        }
+        return str;
     }
 
     // Check if delivery service manager is valid.
