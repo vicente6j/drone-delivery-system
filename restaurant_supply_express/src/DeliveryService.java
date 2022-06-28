@@ -290,6 +290,52 @@ public class DeliveryService {
         return deliveryService;
     }
 
+    public String loadFuel(Integer drone_tag, Integer petrol) {
+        Drone loadingDrone = getDrone(drone_tag);
+        String str = null;
+        if (loadingDrone != null) {
+            if (loadingDrone.getLocation().equals(this.getLocation())) {
+                if (employees.size() > pilots.size() + 1) {
+                    loadingDrone.setRemainingFuel(loadingDrone.getRemainingFuel() + petrol);
+                    str = "OK:change_completed";
+                } else {
+                    str = "ERROR:there_are_not_enough_employees";
+                }
+            } else {
+                str = "ERROR:drone_not_located_at_home_base";
+            }
+        } else {
+            str = "ERROR:drone_does_not_exist_at_this_delivery_service";
+        }
+        return str;
+    }
+
+    public String loadIngredient(Ingredient i, Integer drone_tag, Integer quantity, Integer unit_price) {
+        Drone loadingDrone = getDrone(drone_tag);
+        String str = null;
+        if (loadingDrone != null) {
+            if (loadingDrone.getLocation().equals(this.getLocation())) {
+                if (loadingDrone.getRemainingCapacity() >= quantity) {
+                    if (employees.size() > pilots.size() + 1) {
+                        drone.setRemainingCapacity(drone.getRemainingCapacity() - quantity);
+                        Payload newPayload = new Payload(this.getName(), drone_tag, quantity, unit_price, i);
+                        drone.addPayload(newPayload);
+                        str = "OK:change_completed";
+                    } else {
+                        str = "ERROR:there_are_not_enough_employees";
+                    }
+                } else {
+                    str = "ERROR:drone_does_not_have_enough_space";
+                }
+            } else {
+                str = "ERROR:drone_not_located_at_home_base";
+            }
+        } else {
+            str = "ERROR:drone_does_not_exist_at_this_delivery_service";
+        }
+        return str; 
+    }
+
     // Check if delivery service manager is valid.
     private boolean hasValidManager() {
         return this.manager != null;
