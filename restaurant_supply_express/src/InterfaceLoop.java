@@ -214,50 +214,23 @@ public class InterfaceLoop{
      }
 
     void loadIngredient(String service_name, Integer drone_tag, String barcode, Integer quantity, Integer unit_price) {
-        if (Ingredient.exists(barcode, ingredientList) != null) {
-            Ingredient ingredientPayload = Ingredient.exists(barcode, ingredientList);
-            for (DeliveryService service : this.deliveryServicesList) {
-                if (service.getName().equals(service_name)) {
-                    Drone drone = service.getDrone(drone_tag);
-
-                    if (drone == null) {
-                        System.out.println("ERROR:drone_does_not_exist");
-                        break;
-                    }
-                    if (drone.getLocation().equals(DeliveryService.getLocation(drone.getServiceName(), deliveryServicesList))) {
-                        if (drone.getRemainingCapacity() >= quantity) {
-                            drone.setRemainingCapacity(drone.getRemainingCapacity() - quantity);
-                            Payload newPayload = new Payload(service_name, drone_tag, quantity, unit_price, ingredientPayload);
-                            drone.addPayload(newPayload);//here have to check if we already have it
-                        } else{
-                            System.out.println("ERROR:drone_does_not_have_enough_space");
-                        }
-                    } else {
-                        System.out.println("ERROR:drone_not_located_at_home_base");
-                    }
-                }
-            }
+        Ingredient i = Ingredient.exists(barcode, ingredientList);
+        DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+        if (i != null && ds != null) {
+            String result = ds.loadIngredient(i, drone_tag, quantity, unit_price);
+            System.out.println(result);
         } else {
-            System.out.println("ERROR:ingredient_identifier_does_not_exist");
+            System.out.println("ERROR:ingredient_or_service_does_not_exist");
         }
      }
 
     void loadFuel(String service_name, Integer drone_tag, Integer petrol) {
-        for (DeliveryService service : this.deliveryServicesList) {
-            if (service.getName().equals(service_name)) {
-                Drone drone = service.getDrone(drone_tag);
-
-                if (drone == null) {
-                    System.out.println("ERROR:drone_does_not_exist");
-                    break;
-                }
-                if (drone.getLocation().equals(service.getLocation())) {
-                    drone.setRemainingFuel(drone.getRemainingFuel() + petrol);
-                    System.out.println("OK:change_completed");
-                } else {
-                    System.out.println("ERROR:drone_not_located_at_home_base");
-                }
-            }
+        DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+        if (ds != null) {
+            String result = ds.loadFuel(drone_tag, petrol);
+            System.out.println(result);
+        } else {
+            System.out.println("ERROR:service_does_not_exist");
         }
     }
 
@@ -445,20 +418,8 @@ public class InterfaceLoop{
        }
 
     void appointPilot(String service_name, String user_name, Integer drone_tag) {
-        DeliveryService ds = null;
-        Pilot p = null;
-        for (DeliveryService d : deliveryServicesList) {
-            if (d.getName().equals(service_name)) {
-                ds = d;
-                break;
-            }
-        }
-        for (Pilot per : pilotsList) {
-            if (per.getUsername().equals(user_name)) {
-                p = per;
-                break;
-            }
-        }
+        DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+        Pilot p = Pilot.getPilotByName(user_name, pilotsList);
         if (ds != null && p != null) {
             String result = ds.appointPilot(p, drone_tag);
             System.out.println(result);
@@ -468,13 +429,7 @@ public class InterfaceLoop{
     }
 
     void joinSwarm(String service_name, Integer lead_drone_tag, Integer swarm_drone_tag) {
-        DeliveryService ds = null;
-        for (DeliveryService d : deliveryServicesList) {
-            if (d.getName().equals(service_name)) {
-                ds = d;
-                break;
-            }
-        }
+        DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
         if (ds != null) {
             String result = ds.joinSwarm(lead_drone_tag, swarm_drone_tag);
             System.out.println(result);
@@ -484,13 +439,7 @@ public class InterfaceLoop{
     }
 
     void leaveSwarm(String service_name, Integer swarm_drone_tag) {
-        DeliveryService ds = null;
-        for (DeliveryService d : deliveryServicesList) {
-            if (d.getName().equals(service_name)) {
-                ds = d;
-                break;
-            }
-        }
+        DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
         if (ds != null) {
             String result = ds.leaveSwarm(swarm_drone_tag);
             System.out.println(result);
@@ -592,10 +541,15 @@ public class InterfaceLoop{
                 } else if (tokens[0].equals("train_pilot")) {
                     trainPilot(tokens[1], tokens[2], tokens[3], 
                     Integer.parseInt(tokens[4]));  
+                } else if (tokens[0].equals("appoint_pilot")) {
+                    appointPilot(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
+                } else if (tokens[0].equals("join_swarm")) {
+                    joinSwarm(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3])); 
+                } else if (tokens[0].equals("leave_swarm")) {
+                    leaveSwarm(tokens[1], Integer.parseInt(tokens[2])); 
                 } else if (tokens[0].equals("stop")) {
                     System.out.println("stop acknowledged");
                     break;
-
                 } else {
                     System.out.println("command " + tokens[0] + " NOT acknowledged");
                 }
