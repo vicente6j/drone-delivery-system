@@ -12,7 +12,7 @@ public class Pilot extends Person {
         this.licenseID = init_license;
         this.employedby = service_name;
         this.experience = init_experience;
-        controlledDrones = new ArrayList<Drone>();
+        this.controlledDrones = new ArrayList<Drone>();
     }
 
     public String getLicenseID() {
@@ -32,7 +32,7 @@ public class Pilot extends Person {
     // }
 
     public String getEmployedby() {
-        return employedby;
+        return this.employedby;
     }
 
     public void setEmployedby(String employedby) {
@@ -40,7 +40,7 @@ public class Pilot extends Person {
     }
 
     public Integer getExperience() {
-        return experience;
+        return this.experience;
     }
 
     public void setExperience(Integer experience) {
@@ -52,17 +52,17 @@ public class Pilot extends Person {
     }
 
     public void subtractAppointedDrone(Drone d) {
-        controlledDrones.pop(d);
+        controlledDrones.remove(d);
     }
 
     public ArrayList<Drone> getControlledDrones() {
         return controlledDrones;
     }
 
-    public static Pilot getPilotByName(String user_name, ArrayList<DeliveryService> pilotsList) {
+    public static Pilot getPilotByName(String user_name, ArrayList<Pilot> pilotsList) {
         Pilot pilot = null;
         for (Pilot p : pilotsList) {
-            if (pilot.getUserName().equals(user_name)) {
+            if (p.getUsername().equals(user_name)) {
                 pilot = p;
                 break;
             }

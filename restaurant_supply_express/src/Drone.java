@@ -15,6 +15,7 @@ public class Drone {
 
     private Pilot appointedPilot;
     private Drone leader;
+    private ArrayList <Drone> swarmDrones;
 
     public Drone(String serviceName, Integer initTag, Integer initCapacity, Integer initFuel, String location) {
         this.serviceName = serviceName;
@@ -28,6 +29,7 @@ public class Drone {
         this.payloads = new ArrayList<>();
         this.appointedPilot = null;
         this.leader = null;
+        this.swarmDrones = new ArrayList<>();
     }
 
     public String getServiceName() {
@@ -168,6 +170,17 @@ public class Drone {
     // Reset drone sales to 0 after delivery service collects revenue
     public void resetSales() {
         this.sales = 0;
+    }
+    public ArrayList<Drone> getSwarmDrones(){
+        return swarmDrones;
+    }
+
+    public void eraseSwarmDrones(){
+        swarmDrones = null;
+    }
+
+    public void leaveSwarmDrones(Drone leavingDrone){
+        swarmDrones.remove(leavingDrone);
     }
 }
 

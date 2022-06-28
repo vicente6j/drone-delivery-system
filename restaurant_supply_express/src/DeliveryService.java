@@ -74,6 +74,18 @@ public class DeliveryService {
                     }
                 }
             }
+            if (drone.getAppointedPilot() != null){
+                System.out.println("&> pilot: " + drone.getAppointedPilot().getUsername());
+            }
+            String result = "";
+            if (drone.getSwarmDrones()!= null && drone.getSwarmDrones().size() > 0){
+                result = "&> drone is directing this swarm: [ drone tags |";
+                for (Drone swarm_D : drone.getSwarmDrones()){
+                            result += swarm_D.getInitTag() + " | ";
+                }
+                result = result.substring(0, result.length() - 2) + "]";
+                System.out.println(result);
+            }
         }
     }
 
@@ -154,15 +166,12 @@ public class DeliveryService {
     }
 
     public String train_pilot(Person p, String init_license, Integer init_experience) {
-        System.out.println(employees.size());
         if(this.works_for(p)) {
             if(!p.equals(manager)){
                 if (this.pilots_for(p)== false){
                     if (manager != null){
                         Pilot pilot = new Pilot(this.name, p.getUsername(), p.getFname(), p.getLname(), p.getDate(), p.getAddress(),p.getEmployedIn(), init_license, init_experience);
                         pilots.add(pilot);
-                        System.out.println(pilots.size());
-                        System.out.println(employees.size());
                         return "OK:pilot_has_been_trained";
                     } else {
                         return "ERROR:the_service_doesn't_have_a_valid_manager";
@@ -183,7 +192,8 @@ public class DeliveryService {
             return "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
         String str = null;
-        if (employees.contains(pilot)) {
+
+        if (this.pilots_for(pilot)) {
             if (pilot.getLicenseID() != null) {
                 if (pilot.getManaging().equals("")) {
                     if (pilot.getEmployedIn().size() <= 1) {
@@ -191,6 +201,7 @@ public class DeliveryService {
                             d.getAppointedPilot().subtractAppointedDrone(d);
                         }
                         pilot.addAppointedDrone(d);
+                        d.setAppointedPilot(pilot);
                         return "OK:pilot_has_been_appointed_to_drone";
                     } else {
                         str = "ERROR:employee_is_working_at_more_than_one_company";
@@ -215,6 +226,8 @@ public class DeliveryService {
             if (lead_drone.getLocation().equals(swarm_drone.getLocation())) {
                 if (lead_drone.getAppointedPilot() != null) {
                     swarm_drone.joinSwarm(lead_drone);
+                    swarm_drone.eraseSwarmDrones();
+                    lead_drone.getSwarmDrones().add(swarm_drone);
                     str = "OK:swarm_drone_has_joined_lead_drone";
                 } else {
                     str = "ERROR:lead_drone_has_no_pilot";
@@ -232,6 +245,8 @@ public class DeliveryService {
         Drone swarm_drone = getDrone(swarm_drone_tag);
         String str = null;
         if (swarm_drone != null) {
+            Drone swarm_drone_leader = getDrone(swarm_drone.getLeader().getInitTag());
+            swarm_drone_leader.leaveSwarmDrones(swarm_drone);
             swarm_drone.leaveSwarm();
             str = "OK:swarm_drone_has_left_swarm";
         } else {
@@ -317,9 +332,9 @@ public class DeliveryService {
             if (loadingDrone.getLocation().equals(this.getLocation())) {
                 if (loadingDrone.getRemainingCapacity() >= quantity) {
                     if (employees.size() > pilots.size() + 1) {
-                        drone.setRemainingCapacity(drone.getRemainingCapacity() - quantity);
+                        loadingDrone.setRemainingCapacity(loadingDrone.getRemainingCapacity() - quantity);
                         Payload newPayload = new Payload(this.getName(), drone_tag, quantity, unit_price, i);
-                        drone.addPayload(newPayload);
+                        loadingDrone.addPayload(newPayload);
                         str = "OK:change_completed";
                     } else {
                         str = "ERROR:there_are_not_enough_employees";

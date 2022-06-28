@@ -40,16 +40,26 @@ public class Person{
                     result2 += "&> " + ds.getName() + "\n";
                 }
                 String result3 = "";
+                String result4 = "";
                 if (this instanceof Pilot){
                     Pilot pilot = (Pilot) this;
                     result3 = "\n"+ "user has a pilot's license (" + pilot.getLicenseID() + ") with " + pilot.getExperience() + " successful flight(s)";
+                    if (pilot.getControlledDrones().size() > 0 ){
+                        result4 = "\n"+ "employee is flying these drones:  [ drone tags | " ;
+                        for (Drone d_controlled : pilot.getControlledDrones()){
+                            System.out.println(pilot.getControlledDrones());
+                            result4 += d_controlled.getInitTag() + " | ";
+                        }
+                        result4 = result4.substring(0, result4.length() - 2);
+                        result4 += "]";
+                    }
                 }
-                return result1 + "\n" + result2.substring(0, result2.length()-1) + result3;
+                return result1 + "\n" + result2.substring(0, result2.length()-1) + result3 + result4;
             } else {
                 String result1 = "userID: " + this.username + ", name: " + this.fname + " " + this.lname
                 + ", birth date: " + this.date + ", address: " + this.address;
                 String result2 = "employee is managing: " + managing;
-                return result1 + "\n" + result2.substring(0, result2.length()-1);
+                return result1 + "\n" + result2.substring(0, result2.length());
             }
         }
         
