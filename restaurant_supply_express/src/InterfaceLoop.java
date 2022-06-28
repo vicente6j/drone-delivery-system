@@ -186,7 +186,7 @@ public class InterfaceLoop{
         boolean destinationValid = Location.isValid(destination_name, locationList);
         if (ds != null) {
             if (destinationValid) {
-                String result = ds.flyDrone(drone_tag, destination_name);
+                String result = ds.flyDrone(drone_tag, destination_name, locationList);
                 System.out.println(result);
             } else {
                 System.out.println("ERROR:flight_destination_does_not_exist");
