@@ -164,5 +164,10 @@ public class Drone {
     public String toString() {
         return "tag: " + this.getInitTag() + ", " + "capacity: " + this.getInitCapacity() + ", " + "remaining_cap: " + this.getRemainingCapacity() + ", " + "fuel: " + this.getRemainingFuel() + ", " + "sales: $" + this.getSales() + ", "  + "location: " + this.getLocation();
     }
+
+    // Reset drone sales to 0 after delivery service collects revenue
+    public void resetSales() {
+        this.sales = 0;
+    }
 }
 

@@ -258,8 +258,40 @@ public class DeliveryService {
         return false;
     }
 
+    // Transfer sales from delivery service drones to delivery service revenue
+    public void collectRevenue() {
+        // Check if delivery service has a valid manager.
+        if (!this.hasValidManager()) {
+            System.out.println("ERROR:the_delivery_service_does_not_have_a_valid_manager");
+        } else {
+            int revenue = 0;
+            // Loop through delivery service drones
+            for (Drone drone : this.drones.values()) {
+                // Add each drone sales to revenue
+                revenue += drone.getSales();
+                // Reset drone sales to 0
+                drone.resetSales();
+            }
+            // Update service revenue
+            this.revenue = revenue;
+        }
+    }
 
+    // Public static method to get delivery service by name.
+    // Returns reference to delivery service if found, else null.
+    public static DeliveryService getServiceByName(String service_name, ArrayList<DeliveryService> deliveryServicesList) {
+        DeliveryService deliveryService = null;
+        for (DeliveryService service : deliveryServicesList) {
+            if (service.getName().equals(service_name)) {
+                deliveryService = service;
+                break;
+            }
+        }
+        return deliveryService;
+    }
 
-
-
+    // Check if delivery service manager is valid.
+    private boolean hasValidManager() {
+        return this.manager != null;
+    }
 }

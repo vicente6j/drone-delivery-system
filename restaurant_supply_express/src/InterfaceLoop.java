@@ -499,6 +499,17 @@ public class InterfaceLoop{
         }
     }
 
+    void collectRevenue(String service_name) {
+        DeliveryService service = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+        // Delivery service does not exist
+        if (service == null) {
+            System.out.println("ERROR:the_delivery_service_does_not_exist");
+        } else {
+            // Collect revenue
+            service.collectRevenue();
+        }
+    }
+
 
      //–––––––––––––––––––––––commandLoop() 
 
