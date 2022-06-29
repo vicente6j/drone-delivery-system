@@ -6,13 +6,14 @@ public class Payload {
     private Integer ingredientUnitPrice;
     private Ingredient ingredientAssociated;
 
-    public Payload(String serviceName, Integer droneTag, Integer ingredientQuantity, Integer ingredientUnitPrice, Ingredient ingredient) {
+    public Payload(String serviceName, Integer droneTag, Integer ingredientQuantity, Integer ingredientUnitPrice,
+            Ingredient ingredient) {
         this.droneTag = droneTag;
-        //this.ingredientBarcode = ingredientBarcode;
+        // this.ingredientBarcode = ingredientBarcode;
         this.ingredientQuantity = ingredientQuantity;
         this.ingredientUnitPrice = ingredientUnitPrice;
         this.ingredientAssociated = ingredient;
-        //this.ingredientName = ingredientName;
+        // this.ingredientName = ingredientName;
     }
 
     public Integer getIngredientQuantity() {
@@ -30,7 +31,6 @@ public class Payload {
     public void setIngredientPrice(Integer ingredientUnitPrice) {
         this.ingredientUnitPrice = ingredientUnitPrice;
     }
-
 
     public Integer getDroneTag() {
         return droneTag;
@@ -58,12 +58,15 @@ public class Payload {
 
     public void postSaleUpdate(int quantity, Drone drone) {
         this.setIngredientQuantity(this.getIngredientQuantity() - quantity);
-        if (this.getIngredientQuantity() == 0){
+        if (this.getIngredientQuantity() == 0) {
             drone.removePayload(this);
         }
     }
 
     public String toString() {
-        return "&> " +"barcode: " + this.getIngredientAssociated().getBarcode() + ", " + "item_name: " + this.getIngredientAssociated().getName() + ", " + "total_quantity: " + this.getIngredientQuantity() + ", " + "unit_cost: " + this.getIngredientUnitPrice() + ", " + "total_weight: " + this.getIngredientAssociated().getWeight() * this.getIngredientQuantity();
+        return "&> " + "barcode: " + this.getIngredientAssociated().getBarcode() + ", " + "item_name: "
+                + this.getIngredientAssociated().getName() + ", " + "total_quantity: " + this.getIngredientQuantity()
+                + ", " + "unit_cost: " + this.getIngredientUnitPrice() + ", " + "total_weight: "
+                + this.getIngredientAssociated().getWeight() * this.getIngredientQuantity();
     }
 }

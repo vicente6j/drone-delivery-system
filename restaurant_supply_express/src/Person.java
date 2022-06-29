@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Person{
+public class Person {
     private String username;
     private String fname;
     private String lname;
@@ -14,7 +14,8 @@ public class Person{
 
     private ArrayList<DeliveryService> employedIn;
 
-    public Person(String username, String fname, String lname, String date, String address,ArrayList<DeliveryService> employedIn) {
+    public Person(String username, String fname, String lname, String date, String address,
+            ArrayList<DeliveryService> employedIn) {
         this.username = username;
         this.fname = fname;
         this.lname = lname;
@@ -25,28 +26,28 @@ public class Person{
         this.employedIn = new ArrayList<DeliveryService>(employedIn);
     }
 
-
-    //toString
+    // toString
     public String toString() {
-        if(employedIn.size() == 0) {
+        if (employedIn.size() == 0) {
             return "userID: " + this.username + ", name: " + this.fname + " " + this.lname
-                + ", birth date: " + this.date + ", address: " + this.address;
+                    + ", birth date: " + this.date + ", address: " + this.address;
         } else {
-            if (managing.equals("")){
+            if (managing.equals("")) {
                 String result1 = "userID: " + this.username + ", name: " + this.fname + " " + this.lname
-                + ", birth date: " + this.date + ", address: " + this.address;
+                        + ", birth date: " + this.date + ", address: " + this.address;
                 String result2 = "employee is working at: " + "\n";
-                for(DeliveryService ds: employedIn) {
+                for (DeliveryService ds : employedIn) {
                     result2 += "&> " + ds.getName() + "\n";
                 }
                 String result3 = "";
                 String result4 = "";
-                if (this instanceof Pilot){
+                if (this instanceof Pilot) {
                     Pilot pilot = (Pilot) this;
-                    result3 = "\n"+ "user has a pilot's license (" + pilot.getLicenseID() + ") with " + pilot.getExperience() + " successful flight(s)";
-                    if (pilot.getControlledDrones().size() > 0 ){
-                        result4 = "\n"+ "employee is flying these drones:  [ drone tags | " ;
-                        for (Drone d_controlled : pilot.getControlledDrones()){
+                    result3 = "\n" + "user has a pilot's license (" + pilot.getLicenseID() + ") with "
+                            + pilot.getExperience() + " successful flight(s)";
+                    if (pilot.getControlledDrones().size() > 0) {
+                        result4 = "\n" + "employee is flying these drones:  [ drone tags | ";
+                        for (Drone d_controlled : pilot.getControlledDrones()) {
                             System.out.println(pilot.getControlledDrones());
                             result4 += d_controlled.getInitTag() + " | ";
                         }
@@ -54,18 +55,18 @@ public class Person{
                         result4 += "]";
                     }
                 }
-                return result1 + "\n" + result2.substring(0, result2.length()-1) + result3 + result4;
+                return result1 + "\n" + result2.substring(0, result2.length() - 1) + result3 + result4;
             } else {
                 String result1 = "userID: " + this.username + ", name: " + this.fname + " " + this.lname
-                + ", birth date: " + this.date + ", address: " + this.address;
+                        + ", birth date: " + this.date + ", address: " + this.address;
                 String result2 = "employee is managing: " + managing;
                 return result1 + "\n" + result2.substring(0, result2.length());
             }
         }
-        
+
     }
 
-    //getters
+    // getters
 
     public String getUsername() {
         return this.username;
@@ -87,13 +88,11 @@ public class Person{
         return this.address;
     }
 
-
-
     public ArrayList<DeliveryService> getEmployedIn() {
         return this.employedIn;
     }
 
-    //setters
+    // setters
 
     public void setUsername(String newUsername) {
         this.username = newUsername;
@@ -106,7 +105,7 @@ public class Person{
     public void setLname(String newLname) {
         this.lname = newLname;
     }
-    
+
     public void setDate(String newDate) {
         this.date = newDate;
     }
@@ -114,6 +113,7 @@ public class Person{
     public void setAddress(String newAddress) {
         this.address = newAddress;
     }
+
     public String getManaging() {
         return managing;
     }
@@ -126,12 +126,8 @@ public class Person{
         return isPilot;
     }
 
-
     public void setPilot(boolean isPilot) {
         this.isPilot = isPilot;
     }
-
-
-
 
 }

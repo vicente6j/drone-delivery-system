@@ -15,13 +15,13 @@ public class Drone {
 
     private Pilot appointedPilot;
     private Drone leader;
-    private ArrayList <Drone> swarmDrones;
+    private ArrayList<Drone> swarmDrones;
 
     public Drone(String serviceName, Integer initTag, Integer initCapacity, Integer initFuel, String location) {
         this.serviceName = serviceName;
         this.initTag = initTag;
         this.initCapacity = initCapacity;
-        this.initFuel= initFuel;
+        this.initFuel = initFuel;
         this.sales = 0;
         this.remainingFuel = initFuel;
         this.remainingCapacity = initCapacity;
@@ -98,14 +98,16 @@ public class Drone {
 
     public void addPayload(Payload newPayload) {
         boolean found = false;
-        for(Payload payload: this.payloads){
-            if (payload.getIngredientAssociated().getBarcode().equals(newPayload.getIngredientAssociated().getBarcode())) {
+        for (Payload payload : this.payloads) {
+            if (payload.getIngredientAssociated().getBarcode()
+                    .equals(newPayload.getIngredientAssociated().getBarcode())) {
                 found = true;
                 if (payload.getIngredientUnitPrice() == newPayload.getIngredientUnitPrice()) {
                     payload.setIngredientQuantity(payload.getIngredientQuantity() + newPayload.getIngredientQuantity());
                     System.out.println("OK:change_completed");
                 } else {
-                    System.out.println("OK:the_ingredient_couldn_be_added_as_it_has_a_diffrent_price_than_the_original"); 
+                    System.out
+                            .println("OK:the_ingredient_couldn_be_added_as_it_has_a_diffrent_price_than_the_original");
                 }
             }
         }
@@ -164,22 +166,25 @@ public class Drone {
     }
 
     public String toString() {
-        return "tag: " + this.getInitTag() + ", " + "capacity: " + this.getInitCapacity() + ", " + "remaining_cap: " + this.getRemainingCapacity() + ", " + "fuel: " + this.getRemainingFuel() + ", " + "sales: $" + this.getSales() + ", "  + "location: " + this.getLocation();
+        return "tag: " + this.getInitTag() + ", " + "capacity: " + this.getInitCapacity() + ", " + "remaining_cap: "
+                + this.getRemainingCapacity() + ", " + "fuel: " + this.getRemainingFuel() + ", " + "sales: $"
+                + this.getSales() + ", " + "location: " + this.getLocation();
     }
 
     // Reset drone sales to 0 after delivery service collects revenue
     public void resetSales() {
         this.sales = 0;
     }
-    public ArrayList<Drone> getSwarmDrones(){
+
+    public ArrayList<Drone> getSwarmDrones() {
         return swarmDrones;
     }
 
-    public void eraseSwarmDrones(){
+    public void eraseSwarmDrones() {
         swarmDrones = null;
     }
 
-    public void leaveSwarmDrones(Drone leavingDrone){
+    public void leaveSwarmDrones(Drone leavingDrone) {
         swarmDrones.remove(leavingDrone);
     }
 }

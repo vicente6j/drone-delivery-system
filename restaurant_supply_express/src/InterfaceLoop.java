@@ -1,12 +1,12 @@
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Collections;
 import java.util.Date;
 
-public class InterfaceLoop{
+public class InterfaceLoop {
 
-    public InterfaceLoop() { }
+    public InterfaceLoop() {
+    }
 
     public static ArrayList<Ingredient> ingredientList = new ArrayList<>();
     public static ArrayList<Location> locationList = new ArrayList<>();
@@ -15,12 +15,12 @@ public class InterfaceLoop{
     public static ArrayList<Person> personsList = new ArrayList<>();
     public static ArrayList<Pilot> pilotsList = new ArrayList<>();
 
-    void makeIngredient(String init_barcode, String init_name, Integer init_weight) { 
+    void makeIngredient(String init_barcode, String init_name, Integer init_weight) {
         Ingredient newIngredient = new Ingredient(init_barcode, init_name, init_weight);
 
         int index = 0;
         boolean added = false;
-        if(Ingredient.exists(init_barcode, ingredientList) == null){
+        if (Ingredient.exists(init_barcode, ingredientList) == null) {
             while (index < ingredientList.size()) {
                 String a = ingredientList.get(index).getName();
                 String b = newIngredient.getName();
@@ -40,30 +40,30 @@ public class InterfaceLoop{
         }
     }
 
-    void displayIngredients() { 
+    void displayIngredients() {
         for (int i = 0; i < ingredientList.size(); i++) {
             System.out.println(ingredientList.get(i));
         }
         System.out.println("OK:display_completed");
     }
 
-    void makeLocation(String init_name, Integer init_x_coord, Integer init_y_coord, Integer init_space_limit) { 
+    void makeLocation(String init_name, Integer init_x_coord, Integer init_y_coord, Integer init_space_limit) {
         Location loc = new Location(init_name, init_x_coord, init_y_coord, init_space_limit);
         boolean found = false;
-        for (int i = 0; i < locationList.size(); i++){
-            if(locationList.get(i).getName().equals(init_name)){
+        for (int i = 0; i < locationList.size(); i++) {
+            if (locationList.get(i).getName().equals(init_name)) {
                 found = true;
             }
         }
-        if(found == false){
+        if (found == false) {
             locationList.add(loc);
             System.out.println("OK:change_completed");
-        } else{
+        } else {
             System.out.println("ERROR:location_already_exists");
         }
     }
 
-    void displayLocations() { 
+    void displayLocations() {
         String result = "";
         for (int i = 0; i < locationList.size(); i++) {
             System.out.println(locationList.get(i));
@@ -71,11 +71,10 @@ public class InterfaceLoop{
         System.out.println("OK:display_completed");
     }
 
-    
     void checkDistance(String departure_point, String arrival_point) {
         Location departureLocation = null;
         Location arrivalLocation = null;
-        
+
         for (int i = 0; i < locationList.size(); i++) {
             if (locationList.get(i).getName().equals(departure_point)) {
                 departureLocation = locationList.get(i);
@@ -84,9 +83,10 @@ public class InterfaceLoop{
                 arrivalLocation = locationList.get(i);
             }
         }
-        
+
         if (departureLocation != null && arrivalLocation != null) {
-            int distance = 1 + (int) Math.floor(Math.sqrt(Math.pow(arrivalLocation.getX() - departureLocation.getX(), 2) + Math.pow(arrivalLocation.getY() - departureLocation.getY(), 2)));
+            int distance = 1 + (int) Math.floor(Math.sqrt(Math.pow(arrivalLocation.getX() - departureLocation.getX(), 2)
+                    + Math.pow(arrivalLocation.getY() - departureLocation.getY(), 2)));
             System.out.println("OK:distance = " + distance);
         } else {
             System.out.println("ERROR: Locations are not valid.");
@@ -94,7 +94,9 @@ public class InterfaceLoop{
     }
 
     void makeDeliveryService(String init_name, Integer init_revenue, String located_at) {
-        if (!DeliveryService.exists(init_name, deliveryServicesList)){
+        DeliveryService deliveryService = DeliveryService.getServiceByName(init_name, deliveryServicesList);
+
+        if (deliveryService != null) {
             if (!Location.isValid(located_at, locationList)) {
                 System.out.println("ERROR: The delivery service location is invalid.");
             } else {
@@ -110,14 +112,15 @@ public class InterfaceLoop{
     void displayServices() {
         for (int i = 0; i < deliveryServicesList.size(); i++) {
             DeliveryService currentDeliveryService = deliveryServicesList.get(i);
-            String result = "name: " + currentDeliveryService.getName() + ", " + "revenue: $" + currentDeliveryService.getRevenue() + ", " + "location: " + currentDeliveryService.getLocation();
+            String result = "name: " + currentDeliveryService.getName() + ", " + "revenue: $"
+                    + currentDeliveryService.getRevenue() + ", " + "location: " + currentDeliveryService.getLocation();
             System.out.println(result);
         }
         System.out.println("OK:display_completed");
     }
 
-    void makeRestaurant(String init_name, String located_at) { 
-         if (Restaurant.nameUnique(init_name, restaurantList)){
+    void makeRestaurant(String init_name, String located_at) {
+        if (Restaurant.nameUnique(init_name, restaurantList)) {
             if (!Location.isValid(located_at, locationList)) {
                 System.out.println("ERROR: The restaurant location is invalid.");
             } else {
@@ -125,9 +128,9 @@ public class InterfaceLoop{
                 restaurantList.add(newRestaurant);
             }
             System.out.println("OK:change_completed");
-         } else {
+        } else {
             System.out.println("ERROR:restaurant_already_exist");
-         }
+        }
     }
 
     void displayRestaurants() {
@@ -137,20 +140,19 @@ public class InterfaceLoop{
         System.out.println("OK:display_completed");
     }
 
-
     void makeDrone(String service_name, Integer init_tag, Integer init_capacity, Integer init_fuel) {
-        for (DeliveryService service : this.deliveryServicesList) {
-            if (service.getName().equals(service_name)) {
-                if (service.checkIfDroneExists(init_tag)) {
-                    System.out.println("ERROR:drone_identifier_already_exists");
-                    break;
-                }
+        DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
 
-                for (Location location : this.locationList) {
-                    if (service.getLocation().equals(location.getName())) {
+        if (deliveryService != null) {
+            if (deliveryService.checkIfDroneExists(init_tag)) {
+                System.out.println("ERROR:drone_identifier_already_exists");
+            } else {
+                for (Location location : locationList) {
+                    if (deliveryService.getLocation().equals(location.getName())) {
                         if (location.getRemaining() > 0) {
-                            Drone newDrone = new Drone(service_name, init_tag, init_capacity, init_fuel, service.getLocation());
-                            service.addDrone(newDrone);
+                            Drone newDrone = new Drone(service_name, init_tag, init_capacity, init_fuel,
+                                    deliveryService.getLocation());
+                            deliveryService.addDrone(newDrone);
                             location.setRemaining(location.getRemaining() - 1);
                             System.out.println("OK:change_completed");
                         } else {
@@ -164,22 +166,21 @@ public class InterfaceLoop{
     }
 
     void displayDrones(String service_name) {
-        for (DeliveryService service : this.deliveryServicesList) {
-            if (service.getName().equals(service_name)) {
-                service.displayDrones();
-            }
+        DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+
+        if (deliveryService != null) {
+            deliveryService.displayDrones();
         }
-        System.out.println("OK:display_completed");
-     }
+    }
 
     void displayAllDrones() {
-        for (DeliveryService deliveryService : deliveryServicesList){
-            if (deliveryService.getAllDrones().size() > 0){
+        for (DeliveryService deliveryService : deliveryServicesList) {
+            if (deliveryService.getAllDrones().size() > 0) {
                 System.out.println("service name [" + deliveryService.getName() + "] drones:");
                 deliveryService.displayDrones();
             }
         }
-     }
+    }
 
     void flyDrone(String service_name, Integer drone_tag, String destination_name) {
         DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
@@ -205,7 +206,7 @@ public class InterfaceLoop{
         } else {
             System.out.println("ERROR:ingredient_or_service_does_not_exist");
         }
-     }
+    }
 
     void loadFuel(String service_name, Integer drone_tag, Integer petrol) {
         DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
@@ -217,67 +218,70 @@ public class InterfaceLoop{
         }
     }
 
-    void purchaseIngredient(String restaurant_name, String service_name, Integer drone_tag, String barcode, Integer quantity) {
-        for (DeliveryService service : this.deliveryServicesList) {
-            if (service.getName().equals(service_name)) {
-                Drone drone = service.getDrone(drone_tag);
+    void purchaseIngredient(String restaurant_name, String service_name, Integer drone_tag, String barcode,
+            Integer quantity) {
+        DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
 
-                if (drone == null) {
-                    System.out.println("ERROR:drone_does_not_exist");
-                    break;
-                }
-                if(barcode.equals("")){
-                    System.out.println("ERROR:ingredient_identifier_does_not_exist");
-                    break;
-                }
+        if (deliveryService != null) {
+            Drone drone = deliveryService.getDrone(drone_tag);
 
-                if (!drone.getLocation().equals(Restaurant.getLocation(restaurant_name, restaurantList))) {
-                    System.out.println("ERROR:drone_not_located_at_restaurant");
-                    break;
-                }
+            if (drone == null) {
+                System.out.println("ERROR:drone_does_not_exist");
+                return;
+            }
+            if (barcode.equals("")) {
+                System.out.println("ERROR:ingredient_identifier_does_not_exist");
+                return;
+            }
 
-                boolean payloadFound = false;
+            if (!drone.getLocation().equals(Restaurant.getLocation(restaurant_name, restaurantList))) {
+                System.out.println("ERROR:drone_not_located_at_restaurant");
+                return;
+            }
 
-                for (Payload currentPayload : drone.getAllPayloads()) {
-                    if (currentPayload.getIngredientAssociated().getBarcode().equals(barcode)) {
-                        payloadFound = true;
-                        Payload payload = drone.getPayload(barcode);
+            boolean payloadFound = false;
 
-                        if (Payload.validatePurchase(payload, quantity)) {
-                            drone.conductSale(quantity, payload.getIngredientUnitPrice());
-                            Restaurant.makePurchase(restaurant_name, quantity, payload.getIngredientUnitPrice(), restaurantList);
-                            payload.postSaleUpdate(quantity, drone);
-                            System.out.println("OK:change_completed");
-                            break;
-                        }
+            for (Payload currentPayload : drone.getAllPayloads()) {
+                if (currentPayload.getIngredientAssociated().getBarcode().equals(barcode)) {
+                    payloadFound = true;
+                    Payload payload = drone.getPayload(barcode);
+
+                    if (Payload.validatePurchase(payload, quantity)) {
+                        drone.conductSale(quantity, payload.getIngredientUnitPrice());
+                        Restaurant.makePurchase(restaurant_name, quantity, payload.getIngredientUnitPrice(),
+                                restaurantList);
+                        payload.postSaleUpdate(quantity, drone);
+                        System.out.println("OK:change_completed");
+                        return;
                     }
                 }
+            }
 
-                if (!payloadFound) {
-                    System.out.println("ERROR:ingredient_identifier_does_not_exist");
-                }
+            if (!payloadFound) {
+                System.out.println("ERROR:ingredient_identifier_does_not_exist");
             }
         }
-     }
+    }
 
-     //–––––––––––––––––––––––phase 3 new methods
+    // –––––––––––––––––––––––phase 3 new methods
 
-
-     void makePerson(String init_username, String init_fname, String init_lname, Integer init_year, Integer init_month, Integer init_date, String init_address) {
+    void makePerson(String init_username, String init_fname, String init_lname, Integer init_year, Integer init_month,
+            Integer init_date, String init_address) {
         boolean validUser = true;
         for (Person p : personsList) {
-            if(p.getUsername().equals(init_username)) {
+            if (p.getUsername().equals(init_username)) {
                 System.out.println("ERROR:username_exists");
                 validUser = false;
                 break;
             }
         }
-        if(validUser) {
+        if (validUser) {
             int index = 0;
             boolean added = false;
             Date date_format = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat(init_year + "-" + init_month + "-" + init_date);
-            Person per = new Person(init_username, init_fname, init_lname,formatter.format(date_format), init_address, new ArrayList<DeliveryService>());
+            Person per = new Person(init_username, init_fname, init_lname, formatter.format(date_format), init_address,
+                    new ArrayList<DeliveryService>());
             while (index < personsList.size()) {
                 String a = personsList.get(index).getUsername();
                 String b = per.getUsername();
@@ -293,119 +297,97 @@ public class InterfaceLoop{
             }
             System.out.println("OK:person_created");
         }
-     }
+    }
 
-     void displayPersons() {
-        for(Person p: personsList) {
+    void displayPersons() {
+        for (Person p : personsList) {
             System.out.println(p);
         }
         System.out.println("OK:display_completed");
-     }
+    }
 
-     void hireWorker(String service_name, String user_name) {
-        DeliveryService ds = null;
+    void hireWorker(String service_name, String user_name) {
+        DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
         Person p = null;
-        for(DeliveryService d: deliveryServicesList) {
-            if(d.getName().equals(service_name)) {
-                ds = d;
-                break;
-            }
-        }
-        for(Person per: personsList) {
-            if(per.getUsername().equals(user_name)) {
+        for (Person per : personsList) {
+            if (per.getUsername().equals(user_name)) {
                 p = per;
                 break;
             }
         }
-        if (ds!= null & p !=null){
-            String result = ds.hire_worker(p);
+        if (deliveryService != null & p != null) {
+            String result = deliveryService.hire_worker(p);
             System.out.println(result);
-            } else {
-                System.out.println("ERROR: the_values_introduced_are_not_valid");
-            }
-     }
-
-
-     void fireWorker(String service_name, String user_name) { 
-        DeliveryService ds = null;
-        Person p = null;
-        for(DeliveryService d: deliveryServicesList) {
-            if(d.getName().equals(service_name)) {
-                ds = d;
-                break;
-            }
+        } else {
+            System.out.println("ERROR: the_values_introduced_are_not_valid");
         }
-        for(Person per: personsList) {
-            if(per.getUsername().equals(user_name)) {
+    }
+
+    void fireWorker(String service_name, String user_name) {
+        DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+        Person p = null;
+        for (Person per : personsList) {
+            if (per.getUsername().equals(user_name)) {
                 p = per;
                 break;
             }
         }
-        if (ds!= null & p !=null){
-        String result = ds.fire_worker(p);
-        System.out.println(result);
+        if (deliveryService != null & p != null) {
+            String result = deliveryService.fire_worker(p);
+            System.out.println(result);
         } else {
             System.out.println("ERROR: the_values_introduced_are_not_valid");
         }
-     }
-     void appointManager(String service_name, String user_name) {
-        DeliveryService ds = null;
-        Person p = null;
-        for(DeliveryService d: deliveryServicesList) {
-            if(d.getName().equals(service_name)) {
-                ds = d;
-                break;
-            }
-        }
-        for(Person per: personsList) {
-            if(per.getUsername().equals(user_name)) {
-                p = per;
-                break;
-            }
-        }
-        if (ds!= null & p !=null){
-        String result = ds.appoint_manager(p);
-        System.out.println(result);
-        } else {
-            System.out.println("ERROR: the_values_introduced_are_not_valid");
-        }
-      }
+    }
 
-      void trainPilot(String service_name, String user_name, String init_license, Integer init_experience) {
-        DeliveryService ds = null;
+    void appointManager(String service_name, String user_name) {
+        DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
         Person p = null;
-        for(DeliveryService d: deliveryServicesList) {
-            if(d.getName().equals(service_name)) {
-                ds = d;
-                break;
-            }
-        }
-        for(Person per: personsList) {
-            if(per.getUsername().equals(user_name)) {
+        for (Person per : personsList) {
+            if (per.getUsername().equals(user_name)) {
                 p = per;
                 break;
             }
         }
-        if (ds!= null & p !=null){
-        String result = ds.train_pilot(p, init_license, init_experience);
-        if (result.equals("OK:pilot_has_been_trained")){
-            Pilot pilot = new Pilot(ds.getName(), p.getUsername(), p.getFname(), p.getLname(), p.getDate(), p.getAddress(),p.getEmployedIn(), init_license, init_experience);
-            personsList.remove(p);
-            personsList.add((Person)pilot);
-            pilotsList.add(pilot);
-        }
-        System.out.println(result);
+        if (deliveryService != null & p != null) {
+            String result = deliveryService.appoint_manager(p);
+            System.out.println(result);
         } else {
             System.out.println("ERROR: the_values_introduced_are_not_valid");
         }
-       }
+    }
+
+    void trainPilot(String service_name, String user_name, String init_license, Integer init_experience) {
+        DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+        Person p = null;
+        for (Person per : personsList) {
+            if (per.getUsername().equals(user_name)) {
+                p = per;
+                break;
+            }
+        }
+        if (deliveryService != null & p != null) {
+            String result = deliveryService.train_pilot(p, init_license, init_experience);
+            if (result.equals("OK:pilot_has_been_trained")) {
+                Pilot pilot = new Pilot(deliveryService.getName(), p.getUsername(), p.getFname(), p.getLname(),
+                        p.getDate(),
+                        p.getAddress(), p.getEmployedIn(), init_license, init_experience);
+                personsList.remove(p);
+                personsList.add((Person) pilot);
+                pilotsList.add(pilot);
+            }
+            System.out.println(result);
+        } else {
+            System.out.println("ERROR: the_values_introduced_are_not_valid");
+        }
+    }
 
     void appointPilot(String service_name, String user_name, Integer drone_tag) {
         DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
         Pilot p = Pilot.getPilotByName(user_name, pilotsList);
         if (ds != null && p != null) {
             String result = ds.appointPilot(p, drone_tag);
-            System.out.println(result); 
+            System.out.println(result);
         } else {
             System.out.println("ERROR:the_values_introduced_are_not_valid");
         }
@@ -442,8 +424,7 @@ public class InterfaceLoop{
         }
     }
 
-
-     //–––––––––––––––––––––––commandLoop() 
+    // –––––––––––––––––––––––commandLoop()
 
     public void commandLoop() {
         Scanner commandLineInput = new Scanner(System.in);
@@ -468,7 +449,8 @@ public class InterfaceLoop{
                     displayIngredients();
 
                 } else if (tokens[0].equals("make_location")) {
-                    makeLocation(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]), Integer.parseInt(tokens[4]));
+                    makeLocation(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]),
+                            Integer.parseInt(tokens[4]));
 
                 } else if (tokens[0].equals("display_locations")) {
                     displayLocations();
@@ -489,7 +471,8 @@ public class InterfaceLoop{
                     displayRestaurants();
 
                 } else if (tokens[0].equals("make_drone")) {
-                    makeDrone(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]), Integer.parseInt(tokens[4]));
+                    makeDrone(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]),
+                            Integer.parseInt(tokens[4]));
 
                 } else if (tokens[0].equals("display_drones")) {
                     displayDrones(tokens[1]);
@@ -501,16 +484,19 @@ public class InterfaceLoop{
                     flyDrone(tokens[1], Integer.parseInt(tokens[2]), tokens[3]);
 
                 } else if (tokens[0].equals("load_ingredient")) {
-                    loadIngredient(tokens[1], Integer.parseInt(tokens[2]), tokens[3], Integer.parseInt(tokens[4]), Integer.parseInt(tokens[5]));
+                    loadIngredient(tokens[1], Integer.parseInt(tokens[2]), tokens[3], Integer.parseInt(tokens[4]),
+                            Integer.parseInt(tokens[5]));
 
                 } else if (tokens[0].equals("load_fuel")) {
                     loadFuel(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]));
 
                 } else if (tokens[0].equals("purchase_ingredient")) {
-                    purchaseIngredient(tokens[1], tokens[2], Integer.parseInt(tokens[3]), tokens[4], Integer.parseInt(tokens[5]));
+                    purchaseIngredient(tokens[1], tokens[2], Integer.parseInt(tokens[3]), tokens[4],
+                            Integer.parseInt(tokens[5]));
 
                 } else if (tokens[0].equals("make_person")) {
-                    makePerson(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]), Integer.parseInt(tokens[5]), Integer.parseInt(tokens[6]), tokens[7]);
+                    makePerson(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]),
+                            Integer.parseInt(tokens[5]), Integer.parseInt(tokens[6]), tokens[7]);
 
                 } else if (tokens[0].equals("display_persons")) {
                     displayPersons();
@@ -520,16 +506,16 @@ public class InterfaceLoop{
                 } else if (tokens[0].equals("fire_worker")) {
                     fireWorker(tokens[1], tokens[2]);
                 } else if (tokens[0].equals("appoint_manager")) {
-                    appointManager(tokens[1], tokens[2]); 
+                    appointManager(tokens[1], tokens[2]);
                 } else if (tokens[0].equals("train_pilot")) {
-                    trainPilot(tokens[1], tokens[2], tokens[3], 
-                    Integer.parseInt(tokens[4]));  
+                    trainPilot(tokens[1], tokens[2], tokens[3],
+                            Integer.parseInt(tokens[4]));
                 } else if (tokens[0].equals("appoint_pilot")) {
                     appointPilot(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
                 } else if (tokens[0].equals("join_swarm")) {
-                    joinSwarm(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3])); 
+                    joinSwarm(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]));
                 } else if (tokens[0].equals("leave_swarm")) {
-                    leaveSwarm(tokens[1], Integer.parseInt(tokens[2])); 
+                    leaveSwarm(tokens[1], Integer.parseInt(tokens[2]));
                 } else if (tokens[0].equals("stop")) {
                     System.out.println("stop acknowledged");
                     break;

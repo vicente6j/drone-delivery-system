@@ -43,18 +43,19 @@ public class Restaurant {
         return "";
     }
 
-    public static void makePurchase(String name, Integer quantityProduct, Integer unitPriceProduct, ArrayList<Restaurant> restaurantList) {
+    public static void makePurchase(String name, Integer quantityProduct, Integer unitPriceProduct,
+            ArrayList<Restaurant> restaurantList) {
         for (int i = 0; i < restaurantList.size(); i++) {
             if (restaurantList.get(i).getName().equals(name)) {
-                restaurantList.get(i).setMoneySpent(restaurantList.get(i).getMoneySpent()+ quantityProduct * unitPriceProduct);
+                restaurantList.get(i)
+                        .setMoneySpent(restaurantList.get(i).getMoneySpent() + quantityProduct * unitPriceProduct);
             }
         }
     }
 
-
-    public static boolean nameUnique(String name, ArrayList<Restaurant> restaurants){
-        for (int i = 0; i < restaurants.size(); i++){
-            if ( restaurants.get(i).getName().equals(name)){
+    public static boolean nameUnique(String name, ArrayList<Restaurant> restaurants) {
+        for (int i = 0; i < restaurants.size(); i++) {
+            if (restaurants.get(i).getName().equals(name)) {
                 return false;
             }
         }
@@ -63,6 +64,7 @@ public class Restaurant {
     }
 
     public String toString() {
-        return "name: " + this.getName() + ", " + "money_spent: $" + this.getMoneySpent() + ", " + "location: " + this.getLocation();
+        return "name: " + this.getName() + ", " + "money_spent: $" + this.getMoneySpent() + ", " + "location: "
+                + this.getLocation();
     }
 }

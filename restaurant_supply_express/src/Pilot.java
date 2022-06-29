@@ -7,8 +7,9 @@ public class Pilot extends Person {
     private Integer experience;
     private ArrayList<Drone> controlledDrones;
 
-    public Pilot(String service_name, String user_name,String fname, String lname, String date, String address,ArrayList<DeliveryService> employedIn, String init_license, Integer init_experience) {
-        super(user_name, fname, lname,date, address,employedIn);
+    public Pilot(String service_name, String user_name, String fname, String lname, String date, String address,
+            ArrayList<DeliveryService> employedIn, String init_license, Integer init_experience) {
+        super(user_name, fname, lname, date, address, employedIn);
         this.licenseID = init_license;
         this.employedby = service_name;
         this.experience = init_experience;
@@ -24,11 +25,11 @@ public class Pilot extends Person {
     }
 
     // public boolean isLicensed() {
-    //     return licensed;
+    // return licensed;
     // }
 
     // public void setLicensed(boolean licensed) {
-    //     this.licensed = licensed;
+    // this.licensed = licensed;
     // }
 
     public String getEmployedby() {
