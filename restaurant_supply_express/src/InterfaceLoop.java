@@ -561,6 +561,8 @@ public class InterfaceLoop {
                     joinSwarm(tokens[1], Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]));
                 } else if (tokens[0].equals("leave_swarm")) {
                     leaveSwarm(tokens[1], Integer.parseInt(tokens[2]));
+                } else if (tokens[0].equals("collect_revenue")) {
+                    collectRevenue(tokens[1]);
                 } else if (tokens[0].equals("stop")) {
                     System.out.println("stop acknowledged");
                     break;

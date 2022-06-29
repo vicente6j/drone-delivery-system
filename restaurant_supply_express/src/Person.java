@@ -29,8 +29,14 @@ public class Person {
     // toString
     public String toString() {
         if (employedIn.size() == 0) {
-            return "userID: " + this.username + ", name: " + this.fname + " " + this.lname
+            String result1 = "userID: " + this.username + ", name: " + this.fname + " " + this.lname
                     + ", birth date: " + this.date + ", address: " + this.address;
+            String result2 ="";
+            if (((Pilot)this).getLicenseID()!= null){
+             result2 += "\n" + "user has a pilot's license (" + ((Pilot)this).getLicenseID() + ") with "
+            + ((Pilot)this).getExperience() + " successful flight(s)";
+            }
+            return result1 + result2;
         } else {
             if (managing.equals("")) {
                 String result1 = "userID: " + this.username + ", name: " + this.fname + " " + this.lname
@@ -129,5 +135,6 @@ public class Person {
     public void setPilot(boolean isPilot) {
         this.isPilot = isPilot;
     }
+
 
 }

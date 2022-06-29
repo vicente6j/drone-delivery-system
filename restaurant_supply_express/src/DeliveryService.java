@@ -136,8 +136,16 @@ public class DeliveryService {
     public String fire_worker(Person p) {
         if (p.equals(manager)) {
             return "ERROR:employee_is_managing_a_service";
-        } else if (p instanceof Pilot && ((Pilot)p).getEmployedby().equals(this.getName()) && ((Pilot)p).getControlledDrones().size() > 0) {
-            return "ERROR:person_piloting_can't_be_fired";
+        } else if (this.pilots_for(p)) {
+            if (((Pilot)p).getControlledDrones().size() > 0){
+                return "ERROR:person_piloting_can't_be_fired";
+            } else {
+                ((Pilot)p).setEmployedby(null);
+                p.getEmployedIn().remove(this);
+                this.employees.remove(p);
+                this.pilots.remove(p);
+                return "OK:employee_has_been_fired";
+            }
         } else if (employees.contains(p)) {
             p.getEmployedIn().remove(this);
             this.employees.remove(p);
