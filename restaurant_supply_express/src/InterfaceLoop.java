@@ -18,7 +18,7 @@ public class InterfaceLoop {
 
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) {
         if (init_weight < 0) {
-            System.out.println("ERROR:negative_space_limit_not_allowed");
+            System.out.println("ERROR:negative_weight_not_allowed");
             return;
         }
         Ingredient newIngredient = new Ingredient(init_barcode, init_name, init_weight);

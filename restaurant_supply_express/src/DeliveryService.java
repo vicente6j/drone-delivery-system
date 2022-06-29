@@ -122,9 +122,13 @@ public class DeliveryService {
             //     return "OK:new_employee_has_been_hired";
             //     }
         } else {
+            if (this.works_for(p)){
+                return "OK:employee_already_works_for_service" ;
+            } else {
             p.getEmployedIn().add(this);
             this.employees.add(p);
             return "OK:new_employee_has_been_hired";
+            }
         }
     }
 
@@ -132,7 +136,7 @@ public class DeliveryService {
     public String fire_worker(Person p) {
         if (p.equals(manager)) {
             return "ERROR:employee_is_managing_a_service";
-        } else if (p instanceof Pilot && ((Pilot)p).getEmployedby().equals(this.getName())) {
+        } else if (p instanceof Pilot && ((Pilot)p).getEmployedby().equals(this.getName()) && ((Pilot)p).getControlledDrones().size() > 0) {
             return "ERROR:person_piloting_can't_be_fired";
         } else if (employees.contains(p)) {
             p.getEmployedIn().remove(this);
