@@ -48,6 +48,10 @@ public class Pilot extends Person {
         this.experience = experience;
     }
 
+    public void addExperience(Integer newExperience) {
+        this.setExperience(this.getExperience() + newExperience);
+    }
+
     public void addAppointedDrone(Drone d) {
         controlledDrones.add(d);
     }
