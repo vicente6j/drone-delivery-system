@@ -187,4 +187,22 @@ public class Drone {
     public void leaveSwarmDrones(Drone leavingDrone) {
         swarmDrones.remove(leavingDrone);
     }
+
+    public void addFuel(Integer petrol) {
+        this.setRemainingFuel(this.getRemainingFuel() + petrol);
+    }
+
+    public void subtractFuel(Integer petrol) {
+        this.setRemainingFuel(this.getRemainingFuel() - petrol);
+    }
+
+    public void updateCapacity(Integer quantity, String name, Integer drone_tag, Integer unit_price, Ingredient i) {
+        this.setRemainingCapacity(this.getRemainingCapacity - quantity);
+        Payload newPayload = new Payload(name, drone_tag, quantity, unit_price, i);
+        this.addPayload(newPayload);
+    }
+
+    public void updateLocation(String destination) {
+        this.setLocation(destination);
+    }
 }
