@@ -144,7 +144,7 @@ public class Drone {
         this.appointedPilot = p;
     }
 
-    public Pilot getAppointedPilot() {
+    public Worker getAppointedPilot() {
         return appointedPilot;
     }
 

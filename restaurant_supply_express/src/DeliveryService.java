@@ -6,18 +6,17 @@ public class DeliveryService {
     private Integer revenue;
     private String location;
     private HashMap<Integer, Drone> drones;
-    private ArrayList<Person> employees;
-    private Person manager;
-    private ArrayList<Pilot> pilots;
+    private HashMap<String, Worker> employees;
+    private Integer numOfPilots = 0;
+    private Worker manager;
 
     public DeliveryService(String name, Integer revenue, String location) {
         this.name = name;
         this.revenue = revenue;
         this.location = location;
         this.drones = new HashMap<>();
-        this.employees = new ArrayList<>();
+        this.employees = new HashMap<>();
         this.manager = null;
-        this.pilots = new ArrayList<>();
     }
 
     public String getName() {
@@ -30,10 +29,6 @@ public class DeliveryService {
 
     public String getLocation() {
         return this.location;
-    }
-
-    public ArrayList<Person> getEmployees() {
-        return this.employees;
     }
 
     public HashMap<Integer, Drone> getAllDrones() {
@@ -100,115 +95,142 @@ public class DeliveryService {
     }
 
     // ––––––––––phase 3 new methods
-
-    public String hire_worker(Person p) {
-        if (p instanceof Manager) {
-            return "ERROR:employee_can't_be_hired";
-        } else if (p instanceof Pilot && ((Pilot) p).getEmployedby() != null
-                && !((Pilot) p).getEmployedby().equals(this.getName())) {
-            return "ERROR:person_piloting_can't_be_hired";
-            // else {
-            // p.setEmployed(true);
-            // p.getEmployedIn().add(this);
-            // this.employees.add(p);
-            // return "OK:new_employee_has_been_hired";
-            // }
-        } else {
-            p.getEmployedIn().add(this);
-            this.employees.add(p);
-            return "OK:new_employee_has_been_hired";
+    public void hire(Worker worker) {
+        // Check if employee is instance of Manager or Pilot
+        if (validateWorkerHire(worker)) {
+            this.employees.put(worker.getUsername(), worker);
+            worker.getHired(this);
+            System.out.println("OK:new_employee_has_been_hired");
         }
     }
 
-    public String fire_worker(Person p) {
-        if (p.equals(manager)) {
-            return "ERROR:employee_is_managing_a_service";
-        } else if (p instanceof Pilot && ((Pilot) p).getEmployedby().equals(this.getName())) {
-            return "ERROR:person_piloting_can't_be_fired";
-        } else if (employees.contains(p)) {
-            p.getEmployedIn().remove(this);
-            this.employees.remove(p);
-            return "OK:employee_has_been_fired";
+    private boolean validateWorkerHire(Worker worker) {
+        if (worker instanceof Manager) {
+            System.out.println("ERROR:cannot_hire_a_manager");
+            return false;
+        } else if (worker instanceof Pilot) {
+            System.out.println("ERROR:cannot_hire_a_pilot");
+            return false;
         }
-        return "ERROR: the_person_wasn't_hired";
+        return true;
     }
 
-    public String appoint_manager(Person p) {
-        if (employees.contains(p)) {
-            if (!pilots.contains(p)) {
-                if (p.getEmployedIn().size() <= 1) {
-                    if (manager != null) {
-                        for (Person employee : employees) {
-                            if (employee.equals(manager)) {
-                                employee.setManaging("");
-                            }
-                        }
-                    }
-                    manager = p;
-                    p.setManaging(this.getName());
-                    return "OK:employee_has_been_appointed_manager";
-                } else {
-                    return "ERROR:employee_is_working_at_other_companies";
-                }
-            } else {
-                System.out.println("ERROR:employee_is_working_as_a_pilot");
-            }
+    public void fire_worker(Worker worker) {
+        if (!this.employees.containsKey(worker.getUsername())) {
+            System.out.println("ERROR:this_is_not_your_employee");
+            return;
         }
-        return "ERROR:employee_does_not_work_for_this_service";
+        if (worker instanceof Manager) {
+            System.out.println("ERROR:cannot_fire_a_manager");
+            return;
+        }
+        if (worker instanceof Pilot && (((Pilot) worker).getControlledDrones().size() > 0)) {
+            System.out.println("ERROR:cannot_fire_a_pilot_controlling_drones");
+            return;
+        }
+        this.employees.remove(worker.getUsername());
+        worker.getFired(this);
+        System.out.println("ERROR:employee_has_been_fired");
     }
 
-    public String train_pilot(Person p, String init_license, Integer init_experience) {
-        if (this.works_for(p)) {
-            if (!p.equals(manager)) {
-                if (this.pilots_for(p) == false) {
-                    if (manager != null) {
-                        Pilot pilot = new Pilot(this.name, p.getUsername(), p.getFname(), p.getLname(), p.getDate(),
-                                p.getAddress(), p.getEmployedIn(), init_license, init_experience);
-                        pilots.add(pilot);
-                        return "OK:pilot_has_been_trained";
-                    } else {
-                        return "ERROR:the_service_doesn't_have_a_valid_manager";
-                    }
-                } else {
-                    return "ERROR:employee_is_already_working_as_a_pilot";
-                }
-            } else {
-                return "ERROR:employee_is_too_busy_managing";
-            }
+    public void appoint_manager(Worker worker, DeliveryService deliveryService, HashMap<String, Worker> workers) {
+        boolean isValidManager = this.validateManagerAppointment(worker);
+
+        Worker manager = new Manager(worker.getUsername(), worker.getFname(), worker.getLname(), worker.getDate(),
+                worker.getAddress(), deliveryService);
+        workers.replace(worker.getUsername(), manager);
+
+        if (isValidManager) {
+            this.manager = manager;
+            System.out.println("OK:person_has_been_appointed_manager");
         }
-        return "ERROR:employee_does_not_work_for_this_service";
     }
 
-    public String appointPilot(Pilot pilot, Integer drone_tag) {
-        Drone d = getDrone(drone_tag);
-        if (d == null) {
-            return "ERROR:drone_does_not_exist_at_this_delivery_service";
+    private boolean validateManagerAppointment(Worker worker) {
+        String workerUsername = worker.getUsername();
+        if (!this.employees.containsKey(workerUsername)) {
+            System.out.println("ERROR:the_employee_must_be_an_employee");
+            return false;
         }
-        String str = null;
 
-        if (this.pilots_for(pilot)) {
-            if (pilot.getLicenseID() != null) {
-                if (pilot.getManaging().equals("")) {
-                    if (pilot.getEmployedIn().size() <= 1) {
-                        if (d.getAppointedPilot() != null) {
-                            d.getAppointedPilot().subtractAppointedDrone(d);
-                        }
-                        pilot.addAppointedDrone(d);
-                        d.setAppointedPilot(pilot);
-                        return "OK:pilot_has_been_appointed_to_drone";
-                    } else {
-                        str = "ERROR:employee_is_working_at_more_than_one_company";
-                    }
-                } else {
-                    str = "ERROR:employee_is_working_as_a_manager";
-                }
-            } else {
-                str = "ERROR:employee_does_not_have_valid_pilot_license";
-            }
-        } else {
-            str = "ERROR:employee_is_not_working_for_this_service";
+        if (worker instanceof Pilot) {
+            System.out.println("ERROR:the_manager_cannot_be_a_pilot");
+            return false;
         }
-        return str;
+
+        if (worker.getWorksForCount() > 1) {
+            System.out.println("ERROR:the_manager_cannot_work_for_other_services");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validatePilotTrain(Worker worker, HashMap<String, Worker> workers) {
+        if (!this.employees.containsKey(worker.getUsername())) {
+            System.out.println("ERROR:the_employee_must_be_an_employee");
+            return false;
+        }
+
+        if (worker instanceof Manager) {
+            System.out.println("ERROR:the_pilot_cannot_be_a_manager");
+            return false;
+        }
+
+        if (worker.getWorksForCount() > 1) {
+            System.out.println("ERROR:the_pilot_cannot_work_for_other_services");
+            return false;
+        }
+
+        if (worker instanceof Pilot) {
+            System.out.println("ERROR:already_a_pilot");
+            return false;
+        }
+
+        return true;
+    }
+
+    public void train_pilot(Worker worker, String init_license, Integer init_experience,
+            HashMap<String, Worker> workers) {
+
+        if (this.manager == null) {
+            System.out.println("ERROR:service_does_not_have_valid_manager");
+            return;
+        }
+
+        if (validatePilotTrain(worker, workers)) {
+            worker.getTrained(init_license, init_experience);
+        }
+    }
+
+    public void appointPilot(Worker worker, DeliveryService deliveryService, Integer drone_tag,
+            HashMap<String, Worker> workers) {
+        Drone drone = this.drones.get(drone_tag);
+        if (drone == null) {
+            System.out.println("ERROR:drone_does_not_exist_at_this_delivery_service");
+        }
+
+        if (!this.employees.containsKey(worker.getUsername())) {
+            System.out.println("ERROR:pilot_does_not_work_for_service");
+            return;
+        }
+
+        if (worker.getLicenseID() == null) {
+            System.out.println("ERROR:worker_does_not_have_valid_pilot_license");
+            return;
+        }
+
+        if (drone.getAppointedPilot() != null) {
+            ((Pilot) drone.getAppointedPilot()).subtractAppointedDrone(drone);
+        }
+
+        Worker pilot = new Pilot(worker.getUsername(), worker.getFname(),
+                worker.getLname(), worker.getDate(),
+                worker.getAddress(), worker.getLicenseID(), worker.getExperience());
+        workers.replace(worker.getUsername(), pilot);
+
+        ((Pilot) pilot).addAppointedDrone(drone);
+
+        System.out.println("OK:pilot_has_been_appointed_to_drone");
     }
 
     public String joinSwarm(Integer lead_drone_tag, Integer swarm_drone_tag) {
@@ -246,24 +268,6 @@ public class DeliveryService {
             str = "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
         return str;
-    }
-
-    private boolean works_for(Person p) {
-        for (Person employee : employees) {
-            if (employee.getUsername().equals(p.getUsername())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean pilots_for(Person p) {
-        for (Pilot pilot : pilots) {
-            if (pilot.getUsername().equals(p.getUsername())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // Transfer sales from delivery service drones to delivery service revenue
@@ -304,7 +308,7 @@ public class DeliveryService {
         String str = null;
         if (loadingDrone != null) {
             if (loadingDrone.getLocation().equals(this.getLocation())) {
-                if (employees.size() > pilots.size() + 1) {
+                if (employees.size() > this.numOfPilots + 1) {
                     loadingDrone.setRemainingFuel(loadingDrone.getRemainingFuel() + petrol);
                     str = "OK:change_completed";
                 } else {
@@ -325,7 +329,7 @@ public class DeliveryService {
         if (loadingDrone != null) {
             if (loadingDrone.getLocation().equals(this.getLocation())) {
                 if (loadingDrone.getRemainingCapacity() >= quantity) {
-                    if (employees.size() > pilots.size() + 1) {
+                    if (employees.size() > this.numOfPilots + 1) {
                         loadingDrone.setRemainingCapacity(loadingDrone.getRemainingCapacity() - quantity);
                         Payload newPayload = new Payload(this.getName(), drone_tag, quantity, unit_price, i);
                         loadingDrone.addPayload(newPayload);

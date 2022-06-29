@@ -1,7 +1,5 @@
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Date;
 import java.util.HashMap;
 
 public class InterfaceLoop {
@@ -13,9 +11,8 @@ public class InterfaceLoop {
     public static ArrayList<Location> locationList = new ArrayList<>();
     public static ArrayList<DeliveryService> deliveryServicesList = new ArrayList<>();
     public static ArrayList<Restaurant> restaurantList = new ArrayList<>();
-    public static ArrayList<Person> personsList = new ArrayList<>();
-    public static ArrayList<Pilot> pilotsList = new ArrayList<>();
     public static HashMap<String, Person> persons = new HashMap<>();
+    public static HashMap<String, Worker> workers = new HashMap<>();
 
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) {
         Ingredient newIngredient = new Ingredient(init_barcode, init_name, init_weight);
@@ -269,7 +266,7 @@ public class InterfaceLoop {
 
     void makePerson(String init_username, String init_fname, String init_lname, Integer init_year, Integer init_month,
             Integer init_date, String init_address) {
-        Person.createPerson(init_username, init_fname, init_lname, init_year, init_month, init_date, init_address,
+        Person.create(init_username, init_fname, init_lname, init_year, init_month, init_date, init_address,
                 persons);
     }
 
@@ -279,89 +276,94 @@ public class InterfaceLoop {
 
     void hireWorker(String service_name, String user_name) {
         DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
-        Person p = null;
-        for (Person per : personsList) {
-            if (per.getUsername().equals(user_name)) {
-                p = per;
-                break;
-            }
+        Person person = Person.getPersonByUsername(user_name, persons);
+
+        if (deliveryService == null) {
+            System.out.println("ERROR:the_delivery_service_does_not_exist.");
         }
-        if (deliveryService != null & p != null) {
-            String result = deliveryService.hire_worker(p);
-            System.out.println(result);
-        } else {
-            System.out.println("ERROR: the_values_introduced_are_not_valid");
+
+        if (person == null) {
+            System.out.println("ERROR:the_person_does_not_exist.");
         }
+
+        Worker worker = workers.get(user_name);
+        if (worker == null) {
+            Worker newWorker = new Worker(person.getUsername(), person.getFname(), person.getLname(), person.getDate(),
+                    person.getAddress());
+            workers.put(user_name, newWorker);
+        }
+
+        deliveryService.hire(worker);
     }
 
     void fireWorker(String service_name, String user_name) {
         DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
-        Person p = null;
-        for (Person per : personsList) {
-            if (per.getUsername().equals(user_name)) {
-                p = per;
-                break;
-            }
+        Person person = Person.getPersonByUsername(user_name, persons);
+
+        if (person == null) {
+            System.out.println("ERROR:the_person_does_not_exist.");
         }
-        if (deliveryService != null & p != null) {
-            String result = deliveryService.fire_worker(p);
-            System.out.println(result);
-        } else {
-            System.out.println("ERROR: the_values_introduced_are_not_valid");
+
+        Worker worker = workers.get(user_name);
+
+        if (worker == null) {
+            System.out.println("ERROR:the_worker_does_not_exist.");
         }
+
+        deliveryService.fire_worker(worker);
     }
 
     void appointManager(String service_name, String user_name) {
         DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
-        Person p = null;
-        for (Person per : personsList) {
-            if (per.getUsername().equals(user_name)) {
-                p = per;
-                break;
-            }
+        Person person = Person.getPersonByUsername(user_name, persons);
+
+        if (deliveryService == null) {
+            System.out.println("ERROR:the_delivery_service_does_not_exist.");
         }
-        if (deliveryService != null & p != null) {
-            String result = deliveryService.appoint_manager(p);
-            System.out.println(result);
-        } else {
-            System.out.println("ERROR: the_values_introduced_are_not_valid");
+
+        if (person == null) {
+            System.out.println("ERROR:the_person_does_not_exist.");
         }
+
+        Worker worker = workers.get(user_name);
+
+        if (worker == null) {
+            System.out.println("ERROR:the_person_is_not_a_worker.");
+        }
+
+        deliveryService.appoint_manager(worker, deliveryService, workers);
     }
 
     void trainPilot(String service_name, String user_name, String init_license, Integer init_experience) {
         DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
-        Person p = null;
-        for (Person per : personsList) {
-            if (per.getUsername().equals(user_name)) {
-                p = per;
-                break;
-            }
+        Person person = Person.getPersonByUsername(user_name, persons);
+
+        if (deliveryService == null) {
+            System.out.println("ERROR:the_delivery_service_does_not_exist.");
         }
-        if (deliveryService != null & p != null) {
-            String result = deliveryService.train_pilot(p, init_license, init_experience);
-            if (result.equals("OK:pilot_has_been_trained")) {
-                Pilot pilot = new Pilot(deliveryService.getName(), p.getUsername(), p.getFname(), p.getLname(),
-                        p.getDate(),
-                        p.getAddress(), p.getEmployedIn(), init_license, init_experience);
-                personsList.remove(p);
-                personsList.add((Person) pilot);
-                pilotsList.add(pilot);
-            }
-            System.out.println(result);
-        } else {
-            System.out.println("ERROR: the_values_introduced_are_not_valid");
+
+        if (person == null) {
+            System.out.println("ERROR:the_person_does_not_exist.");
         }
+
+        Worker worker = workers.get(user_name);
+
+        if (worker == null) {
+            System.out.println("ERROR:the_person_is_not_a_worker.");
+        }
+
+        deliveryService.train_pilot(worker, init_license, init_experience, workers);
     }
 
     void appointPilot(String service_name, String user_name, Integer drone_tag) {
-        DeliveryService ds = DeliveryService.getServiceByName(service_name, deliveryServicesList);
-        Pilot p = Pilot.getPilotByName(user_name, pilotsList);
-        if (ds != null && p != null) {
-            String result = ds.appointPilot(p, drone_tag);
-            System.out.println(result);
-        } else {
-            System.out.println("ERROR:the_values_introduced_are_not_valid");
+        DeliveryService deliveryService = DeliveryService.getServiceByName(service_name, deliveryServicesList);
+        Worker worker = workers.get(user_name);
+
+        if (worker == null) {
+            System.out.println("ERROR:the_worker_does_not_exist");
         }
+
+        deliveryService.appointPilot(worker, deliveryService, drone_tag, workers);
     }
 
     void joinSwarm(String service_name, Integer lead_drone_tag, Integer swarm_drone_tag) {
