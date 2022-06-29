@@ -197,7 +197,7 @@ public class Drone {
     }
 
     public void updateCapacity(Integer quantity, String name, Integer drone_tag, Integer unit_price, Ingredient i) {
-        this.setRemainingCapacity(this.getRemainingCapacity - quantity);
+        this.setRemainingCapacity(this.getRemainingCapacity() - quantity);
         Payload newPayload = new Payload(name, drone_tag, quantity, unit_price, i);
         this.addPayload(newPayload);
     }

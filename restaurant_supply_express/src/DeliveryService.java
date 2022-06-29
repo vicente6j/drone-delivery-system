@@ -195,24 +195,29 @@ public class DeliveryService {
             return "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
         if (this.pilots_for(pilot)) {
-            if (pilot.getLicenseID() != null) {
-                if (pilot.getManaging().equals("")) {
-                    if (pilot.getEmployedIn().size() <= 1) {
-                        if (d.getAppointedPilot() != null) {
-                            d.getAppointedPilot().subtractAppointedDrone(d);
+            if (pilot.getEmployedIn().size() == 1) {
+                if (pilot.getLicenseID() != null) {
+                    if (pilot.getManaging().equals("")) {
+                        if (pilot.getEmployedIn().size() <= 1) {
+                            if (d.getAppointedPilot() != null) {
+                                d.getAppointedPilot().subtractAppointedDrone(d);
+                            }
+                            pilot.addAppointedDrone(d);
+                            d.setAppointedPilot(pilot);
+                            return "OK:pilot_has_been_appointed_to_drone";
+                        } else {
+                            return "ERROR:employee_is_working_at_more_than_one_company";
                         }
-                        pilot.addAppointedDrone(d);
-                        d.setAppointedPilot(pilot);
-                        return "OK:pilot_has_been_appointed_to_drone";
                     } else {
-                        return "ERROR:employee_is_working_at_more_than_one_company";
+                        return "ERROR:employee_is_working_as_a_manager";
                     }
                 } else {
-                    return "ERROR:employee_is_working_as_a_manager";
+                    return "ERROR:employee_does_not_have_valid_pilot_license";
                 }
             } else {
-                return "ERROR:employee_does_not_have_valid_pilot_license";
+                return "ERROR:employee_is_employed_to_multiple_services";
             }
+            
         } else {
             return "ERROR:employee_is_not_working_for_this_service";
         }
