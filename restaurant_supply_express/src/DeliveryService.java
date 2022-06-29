@@ -15,9 +15,9 @@ public class DeliveryService {
         this.revenue = revenue;
         this.location = location;
         this.drones = new HashMap<>();
-        this.employees = new ArrayList<>();
+        this.employees = new ArrayList<Person>();
         this.manager = null;
-        this.pilots = new ArrayList<>();
+        this.pilots = new ArrayList<Pilot>();
     }
 
     public String getName() {
@@ -36,7 +36,7 @@ public class DeliveryService {
         return this.employees;
     }
 
-    public HashMap<Integer, Drone> getAllDrones() {
+    public HashMap<Integer, Drone> getAllDrones( ) {
         return this.drones;
     }
 
@@ -67,27 +67,26 @@ public class DeliveryService {
     public void displayDrones() {
         for (Drone drone : this.drones.values()) {
             System.out.println(drone);
-            if (drone.getAllPayloads().size() > 0) {
-                for (Payload payload : drone.getAllPayloads()) {
-                    if (payload.getIngredientQuantity() > 0) {
+            if (drone.getAllPayloads().size() > 0){
+                for (Payload payload: drone.getAllPayloads()){
+                    if (payload.getIngredientQuantity() > 0){
                         System.out.println(payload);
                     }
                 }
             }
-            if (drone.getAppointedPilot() != null) {
+            if (drone.getAppointedPilot() != null){
                 System.out.println("&> pilot: " + drone.getAppointedPilot().getUsername());
             }
             String result = "";
-            if (drone.getSwarmDrones() != null && drone.getSwarmDrones().size() > 0) {
+            if (drone.getSwarmDrones()!= null && drone.getSwarmDrones().size() > 0) {
                 result = "&> drone is directing this swarm: [ drone tags | ";
                 for (Drone swarm_D : drone.getSwarmDrones()) {
-                    result += swarm_D.getInitTag() + " | ";
+                            result += swarm_D.getInitTag() + " | ";
                 }
                 result = result.substring(0, result.length() - 2) + "]";
                 System.out.println(result);
             }
         }
-        System.out.println("OK:display_completed");
     }
 
     public static String getLocation(String name, ArrayList<DeliveryService> deliveryServicesList) {
@@ -99,20 +98,29 @@ public class DeliveryService {
         return "";
     }
 
-    // ––––––––––phase 3 new methods
+    public static boolean exists(String name, ArrayList<DeliveryService> deliveryServices){
+        for (int i = 0; i < deliveryServices.size(); i++){
+            if (deliveryServices.get(i).getName().equals(name)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //––––––––––phase 3 new methods
 
     public String hire_worker(Person p) {
         if (p instanceof Manager) {
             return "ERROR:employee_can't_be_hired";
-        } else if (p instanceof Pilot && ((Pilot) p).getEmployedby() != null
-                && !((Pilot) p).getEmployedby().equals(this.getName())) {
+        } else if(p instanceof Pilot && ((Pilot)p).getEmployedby() != null 
+                && !((Pilot)p).getEmployedby().equals(this.getName())) {
             return "ERROR:person_piloting_can't_be_hired";
-            // else {
-            // p.setEmployed(true);
-            // p.getEmployedIn().add(this);
-            // this.employees.add(p);
-            // return "OK:new_employee_has_been_hired";
-            // }
+            //     else {
+            //     p.setEmployed(true);
+            //     p.getEmployedIn().add(this);
+            //     this.employees.add(p);
+            //     return "OK:new_employee_has_been_hired";
+            //     }
         } else {
             p.getEmployedIn().add(this);
             this.employees.add(p);
@@ -120,10 +128,11 @@ public class DeliveryService {
         }
     }
 
+
     public String fire_worker(Person p) {
         if (p.equals(manager)) {
             return "ERROR:employee_is_managing_a_service";
-        } else if (p instanceof Pilot && ((Pilot) p).getEmployedby().equals(this.getName())) {
+        } else if (p instanceof Pilot && ((Pilot)p).getEmployedby().equals(this.getName())) {
             return "ERROR:person_piloting_can't_be_fired";
         } else if (employees.contains(p)) {
             p.getEmployedIn().remove(this);
@@ -160,10 +169,11 @@ public class DeliveryService {
     public String train_pilot(Person p, String init_license, Integer init_experience) {
         if (this.works_for(p)) {
             if (!p.equals(manager)) {
-                if (this.pilots_for(p) == false) {
+                if (!(this.pilots_for(p))) {
                     if (manager != null) {
-                        Pilot pilot = new Pilot(this.name, p.getUsername(), p.getFname(), p.getLname(), p.getDate(),
-                                p.getAddress(), p.getEmployedIn(), init_license, init_experience);
+                        Pilot pilot = new Pilot(this.name, p.getUsername(), p.getFname(), 
+                            p.getLname(), p.getDate(), p.getAddress(),p.getEmployedIn(), 
+                            init_license, init_experience);
                         pilots.add(pilot);
                         return "OK:pilot_has_been_trained";
                     } else {
@@ -184,8 +194,6 @@ public class DeliveryService {
         if (d == null) {
             return "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
-        String str = null;
-
         if (this.pilots_for(pilot)) {
             if (pilot.getLicenseID() != null) {
                 if (pilot.getManaging().equals("")) {
@@ -197,59 +205,58 @@ public class DeliveryService {
                         d.setAppointedPilot(pilot);
                         return "OK:pilot_has_been_appointed_to_drone";
                     } else {
-                        str = "ERROR:employee_is_working_at_more_than_one_company";
+                        return "ERROR:employee_is_working_at_more_than_one_company";
                     }
                 } else {
-                    str = "ERROR:employee_is_working_as_a_manager";
+                    return "ERROR:employee_is_working_as_a_manager";
                 }
             } else {
-                str = "ERROR:employee_does_not_have_valid_pilot_license";
+                return "ERROR:employee_does_not_have_valid_pilot_license";
             }
         } else {
-            str = "ERROR:employee_is_not_working_for_this_service";
+            return "ERROR:employee_is_not_working_for_this_service";
         }
-        return str;
     }
-
+    
     public String joinSwarm(Integer lead_drone_tag, Integer swarm_drone_tag) {
         Drone lead_drone = getDrone(lead_drone_tag);
         Drone swarm_drone = getDrone(swarm_drone_tag);
-        String str = null;
         if (lead_drone != null && swarm_drone != null) {
             if (lead_drone.getLocation().equals(swarm_drone.getLocation())) {
                 if (lead_drone.getAppointedPilot() != null) {
                     swarm_drone.joinSwarm(lead_drone);
                     swarm_drone.eraseSwarmDrones();
                     lead_drone.getSwarmDrones().add(swarm_drone);
-                    str = "OK:swarm_drone_has_joined_lead_drone";
+                    return "OK:swarm_drone_has_joined_lead_drone";
                 } else {
-                    str = "ERROR:lead_drone_has_no_pilot";
+                    return "ERROR:lead_drone_has_no_valid_pilot_or_it_joined_its_own_swarm";
                 }
             } else {
-                str = "ERROR:drones_have_different_locations";
+                return "ERROR:drones_have_different_locations";
             }
         } else {
-            str = "ERROR:one_or_both_drones_do_not_exist_at_this_delivery_service";
+           return "ERROR:one_or_both_drones_do_not_exist_at_this_delivery_service";
         }
-        return str;
     }
 
     public String leaveSwarm(Integer swarm_drone_tag) {
         Drone swarm_drone = getDrone(swarm_drone_tag);
-        String str = null;
         if (swarm_drone != null) {
             Drone swarm_drone_leader = getDrone(swarm_drone.getLeader().getInitTag());
-            swarm_drone_leader.leaveSwarmDrones(swarm_drone);
-            swarm_drone.leaveSwarm();
-            str = "OK:change_completed";
+            if (swarm_drone_leader != null) {
+                swarm_drone_leader.leaveSwarmDrones(swarm_drone);
+                swarm_drone.leaveSwarm();
+                return "OK:change_completed";
+            } else {
+                return "ERROR:drone_is_not_in_swarm";
+            }
         } else {
-            str = "ERROR:drone_does_not_exist_at_this_delivery_service";
+            return "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
-        return str;
     }
 
     private boolean works_for(Person p) {
-        for (Person employee : employees) {
+        for (Person employee: employees) {
             if (employee.getUsername().equals(p.getUsername())) {
                 return true;
             }
@@ -258,7 +265,7 @@ public class DeliveryService {
     }
 
     private boolean pilots_for(Person p) {
-        for (Pilot pilot : pilots) {
+        for (Pilot pilot: pilots) {
             if (pilot.getUsername().equals(p.getUsername())) {
                 return true;
             }
@@ -287,8 +294,7 @@ public class DeliveryService {
 
     // Public static method to get delivery service by name.
     // Returns reference to delivery service if found, else null.
-    public static DeliveryService getServiceByName(String service_name,
-            ArrayList<DeliveryService> deliveryServicesList) {
+    public static DeliveryService getServiceByName(String service_name, ArrayList<DeliveryService> deliveryServicesList) {
         DeliveryService deliveryService = null;
         for (DeliveryService service : deliveryServicesList) {
             if (service.getName().equals(service_name)) {
@@ -301,72 +307,60 @@ public class DeliveryService {
 
     public String loadFuel(Integer drone_tag, Integer petrol) {
         Drone loadingDrone = getDrone(drone_tag);
-        String str = null;
         if (loadingDrone != null) {
             if (loadingDrone.getLocation().equals(this.getLocation())) {
                 if (employees.size() > pilots.size() + 1) {
-                    loadingDrone.setRemainingFuel(loadingDrone.getRemainingFuel() + petrol);
-                    str = "OK:change_completed";
+                    loadingDrone.addFuel(petrol);
+                    return "OK:change_completed";
                 } else {
-                    str = "ERROR:there_are_not_enough_employees";
+                    return "ERROR:there_are_not_enough_employees";
                 }
             } else {
-                str = "ERROR:drone_not_located_at_home_base";
+                return "ERROR:drone_not_located_at_home_base";
             }
         } else {
-            str = "ERROR:drone_does_not_exist_at_this_delivery_service";
+            return "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
-        return str;
     }
 
     public String loadIngredient(Ingredient i, Integer drone_tag, Integer quantity, Integer unit_price) {
         Drone loadingDrone = getDrone(drone_tag);
-        String str = null;
         if (loadingDrone != null) {
             if (loadingDrone.getLocation().equals(this.getLocation())) {
                 if (loadingDrone.getRemainingCapacity() >= quantity) {
                     if (employees.size() > pilots.size() + 1) {
-                        loadingDrone.setRemainingCapacity(loadingDrone.getRemainingCapacity() - quantity);
-                        Payload newPayload = new Payload(this.getName(), drone_tag, quantity, unit_price, i);
-                        loadingDrone.addPayload(newPayload);
-                        str = "OK:change_completed";
+                        loadingDrone.updateCapacity(quantity, this.getName(), drone_tag, unit_price, i);
+                        return "OK:change_completed";
                     } else {
-                        str = "ERROR:there_are_not_enough_employees";
+                        return "ERROR:there_are_not_enough_employees";
                     }
                 } else {
-                    str = "ERROR:drone_does_not_have_enough_space";
+                    return "ERROR:drone_does_not_have_enough_space";
                 }
             } else {
-                str = "ERROR:drone_not_located_at_home_base";
+                return "ERROR:drone_not_located_at_home_base";
             }
         } else {
-            str = "ERROR:drone_does_not_exist_at_this_delivery_service";
+            return "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
-        return str;
     }
-
+    
     public String flyDrone(Integer drone_tag, String destination_name, ArrayList<Location> locationList) {
         Drone flyingDrone = getDrone(drone_tag);
-        String str = null;
         boolean validFlight = false;
-        /*
-         * Validates identity of leading drone and iterates over a new ArrayList<Drone>
-         * including leading drone and swarm
-         ** to see if whole coup passes conditions
-         */
+        String str = null;
+        /* Validates identity of leading drone and iterates over a new ArrayList<Drone> including leading drone and swarm
+        ** to see if whole passes certain conditions. */
         if (flyingDrone != null) {
             if (flyingDrone.getAppointedPilot() != null) {
                 ArrayList<Drone> coup = flyingDrone.getSwarmDrones();
                 coup.add(flyingDrone);
                 for (int i = 0; i < coup.size(); i++) {
-                    int distanceTo = Location.calculateDistance(coup.get(i).getLocation(), destination_name,
-                            locationList);
-                    int distanceBack = Location.calculateDistance(destination_name, coup.get(i).getLocation(),
-                            locationList);
+                    int distanceTo = Location.calculateDistance(coup.get(i).getLocation(), destination_name, locationList);
+                    int distanceBack = Location.calculateDistance(destination_name, coup.get(i).getLocation(), locationList);
                     if (coup.get(i).getRemainingFuel() >= distanceTo + distanceBack) {
                         if (Location.hasSpaceForAll(destination_name, locationList, coup.size())) {
                             validFlight = true;
-                            str = "OK:change_complete";
                         } else {
                             str = "ERROR:not_enough_space_to_maneuver_the_swarm_to_that_location";
                         }
@@ -383,19 +377,24 @@ public class DeliveryService {
         } else {
             str = "ERROR:drone_does_not_exist_at_this_delivery_service";
         }
-        // After validating all conditions first, iterates over coup and updates all
-        // drones
+        /* After validating all conditions first, iterates over coup and updates all drones.
+        ** The reason for validating all the drones first is that if one of the drones in the middle of the
+        ** coup does not pass the condition, you will still have updated all the prior drones fuel
+        ** and destination, which you would have to revert.
+        */
         if (validFlight) {
             ArrayList<Drone> coup = flyingDrone.getSwarmDrones();
             coup.add(flyingDrone);
             for (int i = 0; i < coup.size(); i++) {
                 int distanceTo = Location.calculateDistance(coup.get(i).getLocation(), destination_name, locationList);
-                coup.get(i).setRemainingFuel(coup.get(i).getRemainingFuel() - distanceTo);
+                coup.get(i).getAppointedPilot().addExperience(1);
+                coup.get(i).subtractFuel(distanceTo);
+                coup.get(i).updateLocation(destination_name);
                 Location.increaseRemaining(coup.get(i).getLocation(), locationList);
-                coup.get(i).setLocation(destination_name);
                 Location.decreaseRemaining(destination_name, locationList);
             }
             coup.remove(flyingDrone);
+            str = "OK:change_complete";
         }
         return str;
     }
