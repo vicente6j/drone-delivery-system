@@ -2,6 +2,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 public class Person {
     private String username;
@@ -24,6 +25,32 @@ public class Person {
         this.managing = "";
         this.isPilot = false;
         this.employedIn = new ArrayList<DeliveryService>(employedIn);
+    }
+
+    public static void createPerson(String init_username, String init_fname, String init_lname, Integer init_year,
+            Integer init_month,
+            Integer init_date, String init_address, HashMap<String, Person> persons) {
+        if (getPersonByUsername(init_username, persons) != null) {
+            System.out.println("ERROR:username_exists");
+            return;
+        }
+        Date date = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat(init_year + "-" + init_month + "-" + init_date);
+        Person newPerson = new Person(init_username, init_fname, init_lname, formatter.format(date), init_address,
+                new ArrayList<>());
+        persons.put(init_username, newPerson);
+        System.out.println("OK:person_created");
+    }
+
+    private static Person getPersonByUsername(String username, HashMap<String, Person> persons) {
+        return persons.get(username);
+    }
+
+    public static void displayAll(HashMap<String, Person> persons) {
+        for (Person person : persons.values()) {
+            System.out.println(person);
+        }
+        System.out.println("OK:display_completed");
     }
 
     // toString

@@ -2,6 +2,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Date;
+import java.util.HashMap;
 
 public class InterfaceLoop {
 
@@ -14,6 +15,7 @@ public class InterfaceLoop {
     public static ArrayList<Restaurant> restaurantList = new ArrayList<>();
     public static ArrayList<Person> personsList = new ArrayList<>();
     public static ArrayList<Pilot> pilotsList = new ArrayList<>();
+    public static HashMap<String, Person> persons = new HashMap<>();
 
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) {
         Ingredient newIngredient = new Ingredient(init_barcode, init_name, init_weight);
@@ -267,43 +269,12 @@ public class InterfaceLoop {
 
     void makePerson(String init_username, String init_fname, String init_lname, Integer init_year, Integer init_month,
             Integer init_date, String init_address) {
-        boolean validUser = true;
-        for (Person p : personsList) {
-            if (p.getUsername().equals(init_username)) {
-                System.out.println("ERROR:username_exists");
-                validUser = false;
-                break;
-            }
-        }
-        if (validUser) {
-            int index = 0;
-            boolean added = false;
-            Date date_format = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat(init_year + "-" + init_month + "-" + init_date);
-            Person per = new Person(init_username, init_fname, init_lname, formatter.format(date_format), init_address,
-                    new ArrayList<DeliveryService>());
-            while (index < personsList.size()) {
-                String a = personsList.get(index).getUsername();
-                String b = per.getUsername();
-                if (a.compareTo(b) > 0) {
-                    personsList.add(index, per);
-                    added = true;
-                    break;
-                }
-                index++;
-            }
-            if (!added) {
-                personsList.add(personsList.size(), per);
-            }
-            System.out.println("OK:person_created");
-        }
+        Person.createPerson(init_username, init_fname, init_lname, init_year, init_month, init_date, init_address,
+                persons);
     }
 
     void displayPersons() {
-        for (Person p : personsList) {
-            System.out.println(p);
-        }
-        System.out.println("OK:display_completed");
+        Person.displayAll(persons);
     }
 
     void hireWorker(String service_name, String user_name) {
