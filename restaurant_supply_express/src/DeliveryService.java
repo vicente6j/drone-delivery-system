@@ -330,7 +330,7 @@ public class DeliveryService {
                     loadingDrone.addFuel(petrol);
                     return "OK:change_completed";
                 } else {
-                    return "ERROR:there_are_not_enough_employees";
+                    return "ERROR:there_are_not_enough_regular_workers";
                 }
             } else {
                 return "ERROR:drone_not_located_at_home_base";
