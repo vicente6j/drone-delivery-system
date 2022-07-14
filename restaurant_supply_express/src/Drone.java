@@ -272,6 +272,11 @@ public class Drone {
      * Method for a drone to leave a swarm
      */
     public void leaveSwarm() {
+        // Cannot leave the swarm if it is the leader
+        if (this.swarm.size() > 0) {
+            System.out.println("ERROR:leader_cannot_leave_swarm");
+            return;
+        }
         // Set appointed pilot employee to the swarm leader's appointed pilot employee
         PilotEmployee swarmLeaderPilotEmployee = this.getLeader().getAppointedPilotEmployee();
         this.setAppointedPilotEmployee(swarmLeaderPilotEmployee);
