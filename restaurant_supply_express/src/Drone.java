@@ -257,6 +257,10 @@ public class Drone {
         if (leaderDrone.getLeader() != null) {
             System.out.println("ERROR:cannot_join_the_swarm_since_the_drone_is_following_a_leader");
         }
+        if (this.swarm.size() > 0) {
+            System.out.println("ERROR:swarm_leader_cannot_join_a_different_swarm");
+            return;
+        }
         if (this.appointedPilotEmployee != null) {
             // Remove the drone from pilot's control
             this.appointedPilotEmployee.renounceDrone(this.tag, people, deliveryService.getEmployments());
