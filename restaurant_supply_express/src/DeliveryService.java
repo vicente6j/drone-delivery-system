@@ -230,7 +230,6 @@ public class DeliveryService {
         }
         // Have the pilot take control of the drone
         ((PilotEmployee) people.get(person.getUsername())).takeDrone(droneTag, this.drones, people);
-        System.out.println("OK:employee_has_been_appointed_pilot");
     }
 
     /**

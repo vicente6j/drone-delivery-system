@@ -252,13 +252,15 @@ public class Drone {
             return;
         }
         // Cannot join a drone's swarm if it is not the leader of the swarm
-        if (leaderDrone.getAppointedPilotEmployee() == null) {
-            System.out.println("leader_drone_must_be_controlled_by_pilot");
+        if (leaderDrone.getLeader() != null) {
+            System.out.println("ERROR:cannot_join_the_swarm_since_the_drone_is_following_a_leader");
         }
-        // Remove the drone from pilot's control
-        this.appointedPilotEmployee.renounceDrone(this.tag, people);
-        // Remove appointed pilot employee
-        this.appointedPilotEmployee = null;
+        if (this.appointedPilotEmployee != null) {
+            // Remove the drone from pilot's control
+            this.appointedPilotEmployee.renounceDrone(this.tag, people);
+            // Remove appointed pilot employee
+            this.appointedPilotEmployee = null;
+        }
         // Set drone leader
         this.leader = leaderDrone;
         // Add the drone to the leader's swarm
@@ -294,7 +296,7 @@ public class Drone {
             for (Drone drone : this.swarm.values()) {
                 drones += String.format("| %d ", drone.getTag());
             }
-            swarm = String.format("\n&> drone is directing this swarm: [ drone tags %s]", drones);
+            swarm = String.format("\ndrone is directing this swarm: [ drone tags %s]", drones);
         }
         return String.format("tag: %d, capacity: %d, remaining_cap: %d, fuel: %d, sales: $%d, location: %s", this.tag,
                 this.initCapacity, this.remainingCapacity, this.remainingFuel, this.sales, this.location) + pilot

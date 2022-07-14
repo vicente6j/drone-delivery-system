@@ -47,6 +47,7 @@ public class PilotEmployee extends User {
         // Set the drone to the new appointed pilot
         drone.setAppointedPilotEmployee(this);
         this.controllingDrones.put(droneTag, drone);
+        System.out.println("OK:employee_has_been_appointed_pilot");
     }
 
     /**
