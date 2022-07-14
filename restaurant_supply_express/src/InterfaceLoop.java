@@ -256,10 +256,10 @@ public class InterfaceLoop {
         // Delivery service does not exist
         if (service == null) {
             System.out.println("ERROR:the_delivery_service_does_not_exist");
-        } else {
-            // Collect revenue
-            service.collectRevenue();
+            return;
         }
+        // Collect revenue
+        service.collectRevenue();
     }
 
     // –––––––––––––––––––––––commandLoop()

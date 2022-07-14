@@ -111,9 +111,12 @@ public class Drone {
         if (isInSwarm || isSwarmLeader) {
             Drone swarmLeader = this.leader == null ? this : this.getLeader();
 
+            // Fly the swarmm
             for (Drone drone : swarmLeader.getSwarm().values()) {
                 drone.fly(destination, locations.get(drone.getLocation()));
             }
+            // Fly the drone leader
+            swarmLeader.fly(destination, locations.get(swarmLeader.getLocation()));
             User appointedPilot = ((User) swarmLeader.getAppointedPilotEmployee());
             appointedPilot.increaseExperience();
             System.out.println("OK:swarm_flew");
@@ -156,6 +159,10 @@ public class Drone {
         boolean isSwarmLeader = this.getSwarm().size() > 0;
         if (isInSwarm || isSwarmLeader) {
             Drone swarmLeader = this.leader == null ? this : this.getLeader();
+            if (swarmLeader.getAppointedPilotEmployee() == null) {
+                System.out.println("ERROR:lead_drone_does_not_have_pilot");
+                return false;
+            }
             // Swarm leader's pilot doesn't have a valid license
             if (swarmLeader.getAppointedPilotEmployee().getLicense() == null) {
                 System.out.println("ERROR:swarm_leader_pilot_doesn't_have_valid_license");
@@ -181,7 +188,7 @@ public class Drone {
         } else if (!isInSwarm && !isSwarmLeader) {
             // Drone doesn't have an appointed pilot
             if (this.getAppointedPilotEmployee() == null) {
-                System.out.println("ERROR:the_drone_does_not_have_a_pilot");
+                System.out.println("ERROR:drone_does_not_have_pilot");
                 return false;
             }
             // Drone pilot doesn't have a valid license
@@ -235,8 +242,8 @@ public class Drone {
      */
     public void conductSale(int quantity, int price) {
         int saleValue = quantity * price;
-        this.setSales(this.getSales() + saleValue);
-        this.setRemainingCapacity(this.getRemainingCapacity() + quantity);
+        this.sales += saleValue;
+        this.remainingCapacity += quantity;
     }
 
     /**

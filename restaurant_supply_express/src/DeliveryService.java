@@ -277,7 +277,7 @@ public class DeliveryService {
                 revenue += drone.getSales();
                 drone.setSales(0);
             }
-            this.revenue = revenue;
+            this.revenue += revenue;
             System.out.println("OK:change_completed");
         }
     }
