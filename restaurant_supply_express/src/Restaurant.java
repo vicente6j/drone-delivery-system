@@ -1,13 +1,15 @@
-import java.util.HashMap;
+import java.util.*;
 
 public class Restaurant {
     private String name;
     private String location;
-    private Integer spent = 0;
+    private Double spent = 0.0;
+    private HashMap<DeliveryService, String> memberships;
 
     public Restaurant(String name, String location) {
         this.name = name;
         this.location = location;
+        this.memberships = new HashMap<>(); //change
     }
 
     /**
@@ -59,7 +61,17 @@ public class Restaurant {
      * toString for the restaurant
      */
     public String toString() {
-        return String.format("name: %s, money_spent: $%d, location: %s", this.name, this.spent, this.location);
+        String basicInfo = String.format("name: %s, money_spent: $%.2f, location: %s", this.name, this.spent, this.location);
+        if(!(memberships.isEmpty())) {
+            String membership = "";
+            for (Map.Entry ms: memberships.entrySet()) {
+                membership += (String)ms.getKey().getName() + ": " + (String)ms.getValue() + " member\n";
+            }
+            return basicInfo + membership.substring(0, membership.length()-1);
+        }
+        else {
+            return basicInfo;
+        }
     }
 
     public String getName() {
@@ -78,11 +90,11 @@ public class Restaurant {
         this.location = location;
     }
 
-    public Integer getMoneySpent() {
+    public Double getMoneySpent() {
         return this.spent;
     }
 
-    public void setMoneySpent(Integer spent) {
+    public void setMoneySpent(Double spent) {
         this.spent = spent;
     }
 
@@ -113,10 +125,25 @@ public class Restaurant {
             System.out.println("ERROR:not_enough_ingredient");
             return;
         }
-        this.makePurchase(quantity, payload.getIngredientUnitPrice());
-        drone.conductSale(quantity, payload.getIngredientUnitPrice());
-        payload.postSaleUpdate(quantity, drone);
-        System.out.println("OK:ingredients_sold");
+        if (deliveryService.getMembership(this) == null) { //changes 
+            if(quantity * payload.getIngredientUnitPrice() > 5) {
+                this.makePurchase(deliveryService.priceAfterDiscount(this, quantity, payload.getIngredientUnitPrice()));
+                drone.conductSale(deliveryService.priceAfterDiscount(this, quantity, payload.getIngredientUnitPrice()), quantity);
+                payload.postSaleUpdate(quantity, drone);
+                deliveryService.updateMembership(this, quantity, payload.getIngredientUnitPrice());
+                this.memberships.put(deliveryService, deliveryService.getMembership(this));
+                System.out.println("OK:ingredients_sold");
+            } else {
+                System.out.println("ERROR:first_time_customer_minumum_amount(5)_not_reached");
+            }
+        } else {
+            this.makePurchase(deliveryService.priceAfterDiscount(this, quantity, payload.getIngredientUnitPrice()));
+            drone.conductSale(deliveryService.priceAfterDiscount(this, quantity, payload.getIngredientUnitPrice()), quantity);
+            payload.postSaleUpdate(quantity, drone);
+            deliveryService.updateMembership(this, quantity, payload.getIngredientUnitPrice());
+            this.memberships.put(deliveryService, deliveryService.getMembership(this));
+            System.out.println("OK:ingredients_sold");
+        }
     }
 
     /**
@@ -169,7 +196,8 @@ public class Restaurant {
      *                         buy
      * @param unitPriceProduct Integer representing the unit price of the product
      */
-    public void makePurchase(Integer quantityProduct, Integer unitPriceProduct) {
-        this.spent += quantityProduct * unitPriceProduct;
+    public void makePurchase(Double finalPrice) {
+        this.spent += finalPrice;
     }
+
 }

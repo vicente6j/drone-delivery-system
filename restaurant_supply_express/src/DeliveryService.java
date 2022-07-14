@@ -6,6 +6,8 @@ public class DeliveryService {
     private String location;
     private HashMap<String, Employment> employments;
     private HashMap<Integer, Drone> drones;
+    private HashMap<Restaurant, String> membershipTracker; //change
+    private HashMap<Restaurant, Integer> restaurantPurchaseDirectory; //change
 
     public DeliveryService(String name, Integer revenue, String location) {
         this.name = name;
@@ -13,6 +15,8 @@ public class DeliveryService {
         this.location = location;
         this.employments = new HashMap<>();
         this.drones = new HashMap<>();
+        this.membershipTracker = new HashMap<>(); //change
+        this.restaurantPurchaseDirectory = new HashMap<>(); //change
     }
 
     /**
@@ -275,7 +279,7 @@ public class DeliveryService {
             // Collect the sales from all the service's drones
             for (Drone drone : this.drones.values()) {
                 revenue += drone.getSales();
-                drone.setSales(0);
+                drone.setSales(0.0);
             }
             this.revenue = revenue;
             System.out.println("OK:change_completed");
@@ -495,5 +499,74 @@ public class DeliveryService {
 
     public HashMap<String, Employment> getEmployments() {
         return this.employments;
+    }
+
+    public void updateMembership(Restaurant rest, Integer quantity, Integer unitPrice) { // change
+        if(!(membershipTracker.containsKey(rest))) {
+            membershipTracker.put(rest, "regular");
+            restaurantPurchaseDirectory.put(rest, 0);
+        }
+        String membershipStatus = membershipTracker.get(rest);
+        Integer membershipPoints = restaurantPurchaseDirectory.get(rest);
+        Integer addingPoints = quantity * unitPrice;
+        restaurantPurchaseDirectory.put(rest, membershipPoints + addingPoints);
+        switch (membershipStatus) {
+            case "regular":
+                if(restaurantPurchaseDirectory.get(rest) > 500) {
+                    membershipTracker.put(rest, "bronze");
+                    System.out.println("Congratulations! You've become a bronze member.");
+                }
+                break;
+            case "bronze":
+                if(restaurantPurchaseDirectory.get(rest) > 1000) {
+                    membershipTracker.put(rest, "silver");
+                    System.out.println("Congratulations! You've become a silver member.");
+                }
+                break;
+            case "silver":
+                if(restaurantPurchaseDirectory.get(rest) > 2000) {
+                    membershipTracker.put(rest, "gold");
+                    System.out.println("Congratulations! You've become a gold member.");
+                }
+                break;
+            case "gold":
+                if(restaurantPurchaseDirectory.get(rest) > 5000) {
+                    membershipTracker.put(rest, "platinum");
+                    System.out.println("Congratulations! You've become a platinum member.");
+                }
+                break;
+            case "platinum":
+                System.out.println("Thankyou for your purchase. Your membership remains Platinum.");
+                break;
+        }
+        System.out.println("OK:membership_updated");
+    }
+
+    public String getMembership(Restaurant rest) {
+        if(membershipTracker.containsKey(rest)) {
+            return membershipTracker.get(rest);
+        } else {
+            return null;
+        }
+    }
+
+    public Double priceAfterDiscount(Restaurant rest, Integer quantity, Integer pricePerUnit) {
+        if (membershipTracker.get(rest) == null) {
+            return (1.0) * quantity * pricePerUnit;
+        }
+        String currentMembership = membershipTracker.get(rest);
+        switch(currentMembership) {
+            case "regular":
+                return (1.0) * quantity * pricePerUnit;
+            case "bronze":
+                return (quantity * pricePerUnit * 0.97);
+            case "silver":
+                return (quantity * pricePerUnit * 0.95);
+            case "gold":
+                return (quantity * pricePerUnit * 0.93);
+            case "platinum":
+                return (quantity * pricePerUnit * 0.90);
+        }
+        return 0.0;
     }
 }

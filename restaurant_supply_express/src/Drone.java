@@ -8,7 +8,7 @@ public class Drone {
     private Integer remainingCapacity;
     private Integer initFuel;
     private Integer remainingFuel;
-    private Integer sales = 0;
+    private Double sales = 0.0;
     private String location;
     private PilotEmployee appointedPilotEmployee;
     private Drone leader;
@@ -233,9 +233,8 @@ public class Drone {
      * @param quantity Integer representing the quantity sold
      * @param price    Integer representing the price per unit
      */
-    public void conductSale(int quantity, int price) {
-        int saleValue = quantity * price;
-        this.setSales(this.getSales() + saleValue);
+    public void conductSale(Double finalPrice, Integer quantity) { // change
+        this.setSales(this.getSales() + finalPrice);
         this.setRemainingCapacity(this.getRemainingCapacity() + quantity);
     }
 
@@ -315,7 +314,7 @@ public class Drone {
             }
             swarm = String.format("\ndrone is directing this swarm: [ drone tags %s]", drones);
         }
-        return String.format("tag: %d, capacity: %d, remaining_cap: %d, fuel: %d, sales: $%d, location: %s", this.tag,
+        return String.format("tag: %d, capacity: %d, remaining_cap: %d, fuel: %d, sales: $%.2f, location: %s", this.tag,
                 this.initCapacity, this.remainingCapacity, this.remainingFuel, this.sales, this.location) + pilot
                 + swarm;
 
@@ -357,11 +356,11 @@ public class Drone {
         this.tag = tag;
     }
 
-    public Integer getSales() {
+    public Double getSales() {
         return sales;
     }
 
-    public void setSales(Integer sales) {
+    public void setSales(Double sales) {
         this.sales = sales;
     }
 
