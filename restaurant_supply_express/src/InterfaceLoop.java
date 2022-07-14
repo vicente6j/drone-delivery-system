@@ -100,7 +100,7 @@ public class InterfaceLoop {
         }
         Drone drone = deliveryService.getDrone(drone_tag);
         if (drone == null) {
-            System.out.println("drone_doesn't_exist_at_delivery_service");
+            System.out.println("ERROR:drone_identifier_does_not_exist");
             return;
         }
         drone.fly(locations.get(destination_name), deliveryService, locations);
@@ -129,6 +129,10 @@ public class InterfaceLoop {
     void purchaseIngredient(String restaurant_name, String service_name, Integer drone_tag, String barcode,
             Integer quantity) {
         Restaurant restaurant = restaurants.get(restaurant_name);
+        if (restaurant == null) {
+            System.out.println("ERROR:restaurant_identifier_does_not_exist");
+            return;
+        }
         restaurant.purchaseIngredients(service_name, drone_tag, barcode, quantity, services);
     }
 
@@ -217,17 +221,17 @@ public class InterfaceLoop {
     void joinSwarm(String service_name, Integer lead_drone_tag, Integer swarm_drone_tag) {
         DeliveryService deliveryService = services.get(service_name);
         if (deliveryService == null) {
-            System.out.println("ERROR:delivery_service_doesn't_exist");
+            System.out.println("ERROR:delivery_service_does_not_exist");
             return;
         }
         Drone leaderDrone = deliveryService.getDrone(lead_drone_tag);
         if (leaderDrone == null) {
-            System.out.println("ERROR:leader_drone_doesn't_exist_in_service");
+            System.out.println("ERROR:leader_drone_does_not_exist");
             return;
         }
         Drone swarmDrone = deliveryService.getDrone(swarm_drone_tag);
         if (swarmDrone == null) {
-            System.out.println("ERROR:swarm_drone_doesn't_exist_in_service");
+            System.out.println("ERROR:swarm_drone_does_not_exist");
             return;
         }
         swarmDrone.joinSwarm(leaderDrone, deliveryService, people);

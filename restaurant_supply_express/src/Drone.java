@@ -181,7 +181,7 @@ public class Drone {
         } else if (!isInSwarm && !isSwarmLeader) {
             // Drone doesn't have an appointed pilot
             if (this.getAppointedPilotEmployee() == null) {
-                System.out.println("ERROR:drone_doesn't_have_a_pilot");
+                System.out.println("ERROR:the_drone_does_not_have_a_pilot");
                 return false;
             }
             // Drone pilot doesn't have a valid license
@@ -257,6 +257,7 @@ public class Drone {
         if (leaderDrone.getLeader() != null) {
             System.out.println("ERROR:cannot_join_the_swarm_since_the_drone_is_following_a_leader");
         }
+        // Leader of swarm cannot join another swarm
         if (this.swarm.size() > 0) {
             System.out.println("ERROR:swarm_leader_cannot_join_a_different_swarm");
             return;
@@ -280,7 +281,7 @@ public class Drone {
     public void leaveSwarm() {
         // Cannot leave the swarm if it is the leader
         if (this.swarm.size() > 0) {
-            System.out.println("ERROR:leader_cannot_leave_swarm");
+            System.out.println("ERROR:drone_can_not_leave_while_leading_a_swarm");
             return;
         }
         if (this.getLeader() == null) {

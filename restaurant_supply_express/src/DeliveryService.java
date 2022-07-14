@@ -60,12 +60,12 @@ public class DeliveryService {
     private boolean validateHire(Person person) {
         // Cannot hire a pilot employee.
         if (person instanceof PilotEmployee) {
-            System.out.println("ERROR:employee_too_busy_piloting_drones");
+            System.out.println("ERROR:employee_is_flying_drones");
             return false;
         }
         // Cannot hire a manager.
         if (person instanceof WorkerEmployee && ((WorkerEmployee) person).getIsManager()) {
-            System.out.println("ERROR:too_busy_managing_a_service");
+            System.out.println("ERROR:employee_is_managing_a_service");
             return false;
         }
         return true;
@@ -195,7 +195,7 @@ public class DeliveryService {
         }
         // Cannot appoint a pilot if the service doesn't have a valid manager
         if (this.getManager() == null) {
-            System.out.println("ERROR:no_valid_manager");
+            System.out.println("ERROR:delivery_service_does_not_have_a_manager");
             return false;
         }
         // Cannot train a manager
@@ -278,6 +278,7 @@ public class DeliveryService {
                 drone.setSales(0);
             }
             this.revenue = revenue;
+            System.out.println("OK:change_completed");
         }
     }
 
