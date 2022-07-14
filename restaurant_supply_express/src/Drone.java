@@ -242,11 +242,13 @@ public class Drone {
     /**
      * Method to add a drone to a swarm.
      * 
-     * @param leaderDrone Drone representing the leader swarm of the drone
-     * @param people      HashMap<String, Person> representing the datastructure
-     *                    that stors people
+     * @param leaderDrone     Drone representing the leader swarm of the drone
+     * @param deliveryService DeliveryService representing the service that owns the
+     *                        drones
+     * @param people          HashMap<String, Person> representing the datastructure
+     *                        that stors people
      */
-    public void joinSwarm(Drone leaderDrone, HashMap<String, Person> people) {
+    public void joinSwarm(Drone leaderDrone, DeliveryService deliveryService, HashMap<String, Person> people) {
         if (!this.location.equals(leaderDrone.getLocation())) {
             System.out.println("ERROR:leader_drone_and_swarm_drone_at_different_locations");
             return;
@@ -257,7 +259,7 @@ public class Drone {
         }
         if (this.appointedPilotEmployee != null) {
             // Remove the drone from pilot's control
-            this.appointedPilotEmployee.renounceDrone(this.tag, people);
+            this.appointedPilotEmployee.renounceDrone(this.tag, people, deliveryService.getEmployments());
             // Remove appointed pilot employee
             this.appointedPilotEmployee = null;
         }
@@ -277,6 +279,10 @@ public class Drone {
             System.out.println("ERROR:leader_cannot_leave_swarm");
             return;
         }
+        if (this.getLeader() == null) {
+            System.out.println("ERROR:drone_is_not_in_a_swarm");
+            return;
+        }
         // Set appointed pilot employee to the swarm leader's appointed pilot employee
         PilotEmployee swarmLeaderPilotEmployee = this.getLeader().getAppointedPilotEmployee();
         this.setAppointedPilotEmployee(swarmLeaderPilotEmployee);
@@ -285,6 +291,7 @@ public class Drone {
         // Remove the leader from the swarm drone
         this.leader = null;
         swarmLeaderPilotEmployee.takeDrone(this);
+        System.out.println("OK:drone_left_swarm");
     }
 
     /**

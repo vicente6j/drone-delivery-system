@@ -227,9 +227,10 @@ public class DeliveryService {
         // Turn the worker employee into a pilot
         if (!(person instanceof PilotEmployee)) {
             people.put(person.getUsername(), new PilotEmployee(((User) person)));
+            this.employments.get(person.getUsername()).setType("pilot");
         }
         // Have the pilot take control of the drone
-        ((PilotEmployee) people.get(person.getUsername())).takeDrone(droneTag, this.drones, people);
+        ((PilotEmployee) people.get(person.getUsername())).takeDrone(droneTag, this.drones, people, this.employments);
     }
 
     /**
@@ -268,7 +269,7 @@ public class DeliveryService {
      */
     public void collectRevenue() {
         if (this.getManager() == null) { // Cannot collect revenue if there is no valid manager
-            System.out.println("ERROR:the_delivery_service_does_not_have_a_valid_manager");
+            System.out.println("ERROR:delivery_service_does_not_have_a_manager");
         } else {
             int revenue = 0;
             // Collect the sales from all the service's drones
@@ -380,7 +381,7 @@ public class DeliveryService {
             }
         }
         if (!hasWorkerEmployee) {
-            System.out.println("ERROR:delivery_service_doesn't_have_workers_to_load_fuel");
+            System.out.println("ERROR:delivery_service_does_not_have_regular_workers");
             return;
         }
         drone.addFuel(petrol);
@@ -410,16 +411,6 @@ public class DeliveryService {
             System.out.println("ERROR:drone_not_located_at_home_base");
             return;
         }
-        // Drone doesn't have enought capacity left
-        if (drone.getRemainingCapacity() < quantity) {
-            System.out.println("ERROR:drone_does_not_have_enough_space");
-            return;
-        }
-        // Unit price cannot be negative
-        if (unit_price < 0) {
-            System.out.println("ERROR:negative_unit_price_not_allowed");
-            return;
-        }
         // Delivery service needs a worker employee in order to load drones
         boolean hasWorkerEmployee = false;
         for (Employment employment : this.employments.values()) {
@@ -428,7 +419,17 @@ public class DeliveryService {
             }
         }
         if (!hasWorkerEmployee) {
-            System.out.println("ERROR:delivery_service_doesn't_have_workers_to_load_drone");
+            System.out.println("ERROR:delivery_service_does_not_have_regular_workers");
+            return;
+        }
+        // Drone doesn't have enought capacity left
+        if (drone.getRemainingCapacity() < quantity) {
+            System.out.println("ERROR:drone_does_not_have_enough_space");
+            return;
+        }
+        // Unit price cannot be negative
+        if (unit_price < 0) {
+            System.out.println("ERROR:negative_unit_price_not_allowed");
             return;
         }
         drone.setRemainingCapacity(drone.getRemainingCapacity() - quantity);
@@ -489,5 +490,9 @@ public class DeliveryService {
      */
     public Drone getDrone(Integer droneTag) {
         return this.drones.get(droneTag);
+    }
+
+    public HashMap<String, Employment> getEmployments() {
+        return this.employments;
     }
 }

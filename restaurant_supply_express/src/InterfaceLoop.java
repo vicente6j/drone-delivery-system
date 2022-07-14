@@ -230,7 +230,7 @@ public class InterfaceLoop {
             System.out.println("ERROR:swarm_drone_doesn't_exist_in_service");
             return;
         }
-        swarmDrone.joinSwarm(leaderDrone, people);
+        swarmDrone.joinSwarm(leaderDrone, deliveryService, people);
     }
 
     void leaveSwarm(String service_name, Integer swarm_drone_tag) {

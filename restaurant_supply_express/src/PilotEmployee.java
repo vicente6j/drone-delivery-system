@@ -24,8 +24,12 @@ public class PilotEmployee extends User {
      *                      drones belonging to the service
      * @param people        HashMap<String, Person> data structure representing the
      *                      people in the system
+     * @param employments   HashMap<String, Employment> data structure representing
+     *                      the
+     *                      employments in the delivery service
      */
-    public void takeDrone(Integer droneTag, HashMap<Integer, Drone> serviceDrones, HashMap<String, Person> people) {
+    public void takeDrone(Integer droneTag, HashMap<Integer, Drone> serviceDrones, HashMap<String, Person> people,
+            HashMap<String, Employment> employments) {
         // Pilot is already controlling the drone
         if (this.controllingDrones.containsKey(droneTag)) {
             System.out.println("ERROR:pilot_already_controlling_drone");
@@ -36,7 +40,7 @@ public class PilotEmployee extends User {
         // Remove the drone from the current appointed pilot
         PilotEmployee currentAppointedPilotEmployee = drone.getAppointedPilotEmployee();
         if (currentAppointedPilotEmployee != null) {
-            currentAppointedPilotEmployee.renounceDrone(drone.getTag(), people);
+            currentAppointedPilotEmployee.renounceDrone(drone.getTag(), people, employments);
         }
         // Remove drone from swarm if it was part of one
         if (drone.getLeader() != null) {
@@ -62,17 +66,22 @@ public class PilotEmployee extends User {
     /**
      * Helper method to renounce the drone from a pilot
      * 
-     * @param droneTag Integer representing the tag of the drone to renounce
-     * @param people   HashMap<String, Person> data structure representing the
-     *                 people in the system
+     * @param droneTag    Integer representing the tag of the drone to renounce
+     * @param people      HashMap<String, Person> data structure representing the
+     *                    people in the system
+     * @param employments HashMap<String, Employment> data structure representing
+     *                    the
+     *                    employments in the delivery service
      */
-    public void renounceDrone(Integer droneTag, HashMap<String, Person> people) {
+    public void renounceDrone(Integer droneTag, HashMap<String, Person> people,
+            HashMap<String, Employment> employments) {
         this.controllingDrones.remove(droneTag);
         // Turn the pilot back into a worker if no more drones in their control, but
         // keep license and experience
         if (this.controllingDrones.size() == 0) {
             people.put(this.getUsername(),
                     new WorkerEmployee(this, this.getEmployers(), this.getLicense(), this.getExperience()));
+            employments.get(this.getUsername()).setType("worker");
         }
     }
 
