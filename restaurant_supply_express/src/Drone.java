@@ -50,7 +50,7 @@ public class Drone {
         Drone newDrone = new Drone(service_name, init_tag, init_capacity, init_fuel,
                 location.getName());
         deliveryService.addDrone(newDrone);
-        location.setRemaining(location.getRemaining() - 1);
+        location.decreaseRemainingSpace();
         System.out.println("OK:drone_created");
     }
 
@@ -105,18 +105,20 @@ public class Drone {
         if (!validateFly(destination, deliveryService, locations)) {
             return;
         }
-        Drone swarmLeader = this.leader;
-        boolean isSwarmDrone = this.leader != null ? true : false;
-        if (isSwarmDrone) {
+        boolean isInSwarm = this.leader != null ? true : false;
+        boolean isSwarmLeader = this.getSwarm().size() > 0;
+
+        if (isInSwarm || isSwarmLeader) {
+            Drone swarmLeader = this.leader == null ? this : this.getLeader();
+
             for (Drone drone : swarmLeader.getSwarm().values()) {
-                drone.fly(destination, locations.get(drone.getLocation()),
-                        locations.get(deliveryService.getLocation()));
+                drone.fly(destination, locations.get(drone.getLocation()));
             }
             User appointedPilot = ((User) swarmLeader.getAppointedPilotEmployee());
             appointedPilot.increaseExperience();
             System.out.println("OK:swarm_flew");
         } else {
-            this.fly(destination, locations.get(this.location), locations.get(deliveryService.getLocation()));
+            this.fly(destination, locations.get(this.location));
             User appointedPilot = ((User) this.appointedPilotEmployee);
             appointedPilot.increaseExperience();
             System.out.println("OK:drone_flew");
@@ -128,14 +130,11 @@ public class Drone {
      * 
      * @param destination     Location representing the destination location
      * @param currentLocation Location representing the current drone location
-     * @param homebase        Location representing the delivery service homebase
      */
-    private void fly(Location destination, Location currentLocation, Location homebase) {
+    private void fly(Location destination, Location currentLocation) {
         int distanceTo = Location.calculateDistance(destination,
                 currentLocation);
-        int distanceBack = Location.calculateDistance(homebase,
-                destination);
-        this.remainingFuel -= distanceTo + distanceBack;
+        this.remainingFuel -= distanceTo;
         this.setLocation(destination.getName());
         currentLocation.increaseRemainingSpace();
         destination.decreaseRemainingSpace();
@@ -153,9 +152,10 @@ public class Drone {
      */
     private boolean validateFly(Location destination, DeliveryService deliveryService,
             HashMap<String, Location> locations) {
-        boolean isSwarmDrone = this.leader != null ? true : false;
-        if (isSwarmDrone) {
-            Drone swarmLeader = this.getLeader();
+        boolean isInSwarm = this.leader != null ? true : false;
+        boolean isSwarmLeader = this.getSwarm().size() > 0;
+        if (isInSwarm || isSwarmLeader) {
+            Drone swarmLeader = this.leader == null ? this : this.getLeader();
             // Swarm leader's pilot doesn't have a valid license
             if (swarmLeader.getAppointedPilotEmployee().getLicense() == null) {
                 System.out.println("ERROR:swarm_leader_pilot_doesn't_have_valid_license");
@@ -163,8 +163,8 @@ public class Drone {
             }
             int swarmSize = swarmLeader.getSwarm().size();
             // Not enough space at location for swarm
-            if (destination.getRemaining() < swarmSize) {
-                System.out.println("ERROR:location_doesn't_have_enough_space_for_swarm");
+            if (destination.getRemaining() < swarmSize + 1) {
+                System.out.println("ERROR:not_enough_space_to_maneuver_the_swarm_to_that_location");
                 return false;
             }
             for (Drone drone : swarmLeader.getSwarm().values()) {
@@ -174,11 +174,11 @@ public class Drone {
                         destination);
                 if (drone.getRemainingFuel() < distanceTo + distanceBack) {
                     System.out.println(
-                            "ERROR:a_drone_in_the_swarm_doesn't_have_enough_fuel_to_go_to_destination_and_back");
+                            "ERROR:a_drone_in_the_swarm_doesn't_have_enough_fuel_to_go_to_destination_and_back_to_homebase");
                     return false;
                 }
             }
-        } else if (!isSwarmDrone) {
+        } else if (!isInSwarm && !isSwarmLeader) {
             // Drone doesn't have an appointed pilot
             if (this.getAppointedPilotEmployee() == null) {
                 System.out.println("ERROR:drone_doesn't_have_a_pilot");
