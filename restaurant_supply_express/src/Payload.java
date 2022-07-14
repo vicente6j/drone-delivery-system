@@ -1,20 +1,13 @@
-import java.util.ArrayList;
-
 public class Payload {
-    
-    private Integer droneTag;
     private Integer ingredientQuantity;
     private Integer ingredientUnitPrice;
     private Ingredient ingredientAssociated;
 
-    public Payload(String serviceName, Integer droneTag, Integer ingredientQuantity, Integer ingredientUnitPrice,
+    public Payload(Integer ingredientQuantity, Integer ingredientUnitPrice,
             Ingredient ingredient) {
-        this.droneTag = droneTag;
-        // this.ingredientBarcode = ingredientBarcode;
         this.ingredientQuantity = ingredientQuantity;
         this.ingredientUnitPrice = ingredientUnitPrice;
         this.ingredientAssociated = ingredient;
-        // this.ingredientName = ingredientName;
     }
 
     public Integer getIngredientQuantity() {
@@ -33,14 +26,6 @@ public class Payload {
         this.ingredientUnitPrice = ingredientUnitPrice;
     }
 
-    public Integer getDroneTag() {
-        return droneTag;
-    }
-
-    public void setDroneTag(Integer drone_tag) {
-        this.droneTag = droneTag;
-    }
-
     public Ingredient getIngredientAssociated() {
         return ingredientAssociated;
     }
@@ -49,14 +34,12 @@ public class Payload {
         this.ingredientAssociated = ingredientAssociated;
     }
 
-    public static boolean validatePurchase(Payload payload, int quantityDemanded) {
-        if (payload.getIngredientQuantity() < quantityDemanded) {
-            System.out.println("ERROR:drone_does_not_have_enough_ingredient");
-            return false;
-        }
-        return true;
-    }
-
+    /**
+     * Method to decrease payload ingredient quantity after a sale to restaurant.
+     * 
+     * @param quantity Integer reopresenting the ingredient quantity purchased
+     * @param drone    Drone representing the drone who did the sale
+     */
     public void postSaleUpdate(int quantity, Drone drone) {
         this.setIngredientQuantity(this.getIngredientQuantity() - quantity);
         if (this.getIngredientQuantity() == 0) {
@@ -64,10 +47,12 @@ public class Payload {
         }
     }
 
+    /**
+     * toString for payload
+     */
     public String toString() {
-        return "&> " + "barcode: " + this.getIngredientAssociated().getBarcode() + ", " + "item_name: "
-                + this.getIngredientAssociated().getName() + ", " + "total_quantity: " + this.getIngredientQuantity()
-                + ", " + "unit_cost: " + this.getIngredientUnitPrice() + ", " + "total_weight: "
-                + this.getIngredientAssociated().getWeight() * this.getIngredientQuantity();
+        return String.format("&> barcode: %s, item_name: %s, total_quantity: %d, unit_cost: %d, total_weight: %d",
+                this.ingredientAssociated.getBarcode(), this.ingredientAssociated.getName(), this.ingredientQuantity,
+                this.ingredientUnitPrice, this.ingredientAssociated.getWeight() * this.ingredientQuantity);
     }
 }

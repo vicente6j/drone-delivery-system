@@ -1,78 +1,50 @@
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 
 public class Person {
     private String username;
     private String fname;
     private String lname;
-    private String date;
+    private String birthdate;
     private String address;
-    private String managing;
-    private boolean isPilot;
 
-    private ArrayList<DeliveryService> employedIn;
-
-    public Person(String username, String fname, String lname, String date, String address,
-            ArrayList<DeliveryService> employedIn) {
+    public Person(String username, String fname, String lname, String birthdate, String address) {
         this.username = username;
         this.fname = fname;
         this.lname = lname;
-        this.date = date;
+        this.birthdate = birthdate;
         this.address = address;
-        this.managing = "";
-        this.isPilot = false;
-        this.employedIn = new ArrayList<DeliveryService>(employedIn);
     }
 
-    // toString
+    /**
+     * Creates a new person in the system.
+     * 
+     * @param username String representing the person's username
+     * @param fname    String representing the person's first name
+     * @param lname    String representing the person's last name
+     * @param year     String representing the person's year born
+     * @param month    String representing the person's month born
+     * @param date     String representing the person's date born
+     * @param address  String representing the person's address
+     * @param people   HashMap of the people in the system.
+     */
+    public static void create(String username, String fname, String lname, Integer year, Integer month,
+            Integer date, String address, HashMap<String, Person> people) {
+        Date date_format = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat(year + "-" + month + "-" + date);
+        Person person = new Person(username, fname, lname, formatter.format(date_format), address);
+        people.put(username, person);
+        System.out.println("OK:person_created");
+    }
+
+    /**
+     * toString method for a person
+     */
     public String toString() {
-        if (employedIn.size() == 0) {
-            String result1 = "userID: " + this.username + ", name: " + this.fname + " " + this.lname
-                    + ", birth date: " + this.date + ", address: " + this.address;
-            String result2 ="";
-            if (((Pilot)this).getLicenseID()!= null){
-             result2 += "\n" + "user has a pilot's license (" + ((Pilot)this).getLicenseID() + ") with "
-            + ((Pilot)this).getExperience() + " successful flight(s)";
-            }
-            return result1 + result2;
-        } else {
-            if (managing.equals("")) {
-                String result1 = "userID: " + this.username + ", name: " + this.fname + " " + this.lname
-                        + ", birth date: " + this.date + ", address: " + this.address;
-                String result2 = "employee is working at: " + "\n";
-                for (DeliveryService ds : employedIn) {
-                    result2 += "&> " + ds.getName() + "\n";
-                }
-                String result3 = "";
-                String result4 = "";
-                if (this instanceof Pilot) {
-                    Pilot pilot = (Pilot) this;
-                    result3 = "\n" + "user has a pilot's license (" + pilot.getLicenseID() + ") with "
-                            + pilot.getExperience() + " successful flight(s)";
-                    if (pilot.getControlledDrones().size() > 0) {
-                        result4 = "\n" + "employee is flying these drones:  [ drone tags | ";
-                        for (Drone d_controlled : pilot.getControlledDrones()) {
-                            System.out.println(pilot.getControlledDrones());
-                            result4 += d_controlled.getInitTag() + " | ";
-                        }
-                        result4 = result4.substring(0, result4.length() - 2);
-                        result4 += "]";
-                    }
-                }
-                return result1 + "\n" + result2.substring(0, result2.length() - 1) + result3 + result4;
-            } else {
-                String result1 = "userID: " + this.username + ", name: " + this.fname + " " + this.lname
-                        + ", birth date: " + this.date + ", address: " + this.address;
-                String result2 = "employee is managing: " + managing;
-                return result1 + "\n" + result2.substring(0, result2.length());
-            }
-        }
-
+        return String.format("userId: %s, name: %s, birth date: %s. address: %s", this.username,
+                this.fname + " " + this.lname, this.birthdate, this.address);
     }
-
-    // getters
 
     public String getUsername() {
         return this.username;
@@ -86,55 +58,11 @@ public class Person {
         return this.lname;
     }
 
-    public String getDate() {
-        return this.date;
+    public String getBirthDate() {
+        return this.birthdate;
     }
 
     public String getAddress() {
         return this.address;
     }
-
-    public ArrayList<DeliveryService> getEmployedIn() {
-        return this.employedIn;
-    }
-
-    // setters
-
-    public void setUsername(String newUsername) {
-        this.username = newUsername;
-    }
-
-    public void setFname(String newFname) {
-        this.fname = newFname;
-    }
-
-    public void setLname(String newLname) {
-        this.lname = newLname;
-    }
-
-    public void setDate(String newDate) {
-        this.date = newDate;
-    }
-
-    public void setAddress(String newAddress) {
-        this.address = newAddress;
-    }
-
-    public String getManaging() {
-        return managing;
-    }
-
-    public void setManaging(String managing) {
-        this.managing = managing;
-    }
-
-    public boolean getPilot() {
-        return isPilot;
-    }
-
-    public void setPilot(boolean isPilot) {
-        this.isPilot = isPilot;
-    }
-
-
 }

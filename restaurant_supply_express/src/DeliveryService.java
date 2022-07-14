@@ -1,23 +1,457 @@
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DeliveryService {
     private String name;
     private Integer revenue;
     private String location;
+    private HashMap<String, Employment> employments;
     private HashMap<Integer, Drone> drones;
-    private ArrayList<Person> employees;
-    private Person manager;
-    private ArrayList<Pilot> pilots;
 
     public DeliveryService(String name, Integer revenue, String location) {
         this.name = name;
         this.revenue = revenue;
         this.location = location;
+        this.employments = new HashMap<>();
         this.drones = new HashMap<>();
-        this.employees = new ArrayList<Person>();
-        this.manager = null;
-        this.pilots = new ArrayList<Pilot>();
+    }
+
+    /**
+     * Hire method for a delivery service.
+     * 
+     * @param person Person representing the person in the system to hire.
+     * @param people HashMap<String, Person> representing the datastruture that
+     *               stores all the people in the system.
+     */
+    public void hire(Person person, HashMap<String, Person> people) {
+        // Validate if the person can be hired
+        if (!validateHire(person)) {
+            return;
+        }
+        if (person instanceof WorkerEmployee) { // Person is an existing worker employee
+            hire((User) person);
+        } else { // Person is not an existing worker employee
+            User worker = new WorkerEmployee(person);
+            people.put(worker.getUsername(), worker);
+            hire(worker);
+        }
+        System.out.println("OK:new_employee_has_been_hired");
+    }
+
+    /**
+     * Helper method for hire which creates the worker-service employment
+     * relationship.
+     * 
+     * @param worker User representing the worker to hire
+     */
+    private void hire(User worker) {
+        // Create a new worker employment relationship between the service and worker.
+        Employment employment = new Employment(this, worker, "worker");
+        this.employments.put(worker.getUsername(), employment);
+        // Add the service name to the worker's employers
+        worker.getEmployers().add(this.name);
+    }
+
+    /**
+     * Helper method to validate whether a person can be hired.
+     * 
+     * @param person Person representing the person to be hired.
+     * @return boolean representing if the person can be hired.
+     */
+    private boolean validateHire(Person person) {
+        // Cannot hire a pilot employee.
+        if (person instanceof PilotEmployee) {
+            System.out.println("ERROR:employee_too_busy_piloting_drones");
+            return false;
+        }
+        // Cannot hire a manager.
+        if (person instanceof WorkerEmployee && ((WorkerEmployee) person).getIsManager()) {
+            System.out.println("ERROR:too_busy_managing_a_service");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Fire method for a delivery service
+     * 
+     * @param person Person representing the person to be fired.
+     * @param people HashMap<String, Person> representing the datastruture that
+     *               stores all the people in the system.
+     */
+    public void fire(Person person, HashMap<String, Person> people) {
+        // Validate if the person can be fired
+        if (!validateFire(person)) {
+            return;
+        }
+        // Remove the service-employee relationship
+        this.employments.remove(person.getUsername());
+        ((User) person).getEmployers().remove(this.name);
+        System.out.println("OK:employee_has_been_fired");
+    }
+
+    /**
+     * Helper method to validate whether a person can be fired.
+     * 
+     * @param person Person representing the person to be fired
+     * @return boolean representing whether the person can be fired
+     */
+    private boolean validateFire(Person person) {
+        // Cannot fire someone who doesn't work for the service
+        if (!this.employments.containsKey(person.getUsername())) {
+            System.out.println("ERROR:employee_does_not_work_for_this_service");
+            return false;
+        }
+        // Cannot fire a person if they're a manager
+        if (person instanceof WorkerEmployee && ((WorkerEmployee) person).getIsManager()) {
+            System.out.println("ERROR:employee_is_managing_a_service");
+            return false;
+        }
+        // Cannot fire a pilot employee
+        if (person instanceof PilotEmployee) {
+            System.out.println("ERORR:employee_is_piloting_drones");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Method to appoint a worker employee to be the manager.
+     * 
+     * @param person Person representing the person to appoint to manager
+     * @param people HashMap<String, Person> representing the datastruture that
+     *               stores all the people in the system.
+     */
+    public void appointManager(Person person, HashMap<String, Person> people) {
+        // Validate whether a person can be appointed to manager.
+        if (!validateAppointManager(person)) {
+            return;
+        }
+        // Demote the old manager to a regular worker
+        User currentManager = this.getManager();
+        if (currentManager != null) {
+            ((WorkerEmployee) currentManager).setIsManager(false);
+            this.employments.get(person.getUsername()).setType("worker");
+        }
+        // Promote the worker to the new manager
+        ((WorkerEmployee) person).setIsManager(true);
+        this.employments.get(person.getUsername()).setType("manager");
+        System.out.println("OK:employee_has_been_appointed_manager");
+    }
+
+    /**
+     * Helper method to validate whether a person can be appointed manager.
+     * 
+     * @param person Person representing the person to appoint to manager
+     * @return boolean representing if the person can be apppointed manager
+     */
+    private boolean validateAppointManager(Person person) {
+        // Cannot appoint a person who doesn't work for the service
+        if (!this.employments.containsKey(person.getUsername())) {
+            System.out.println("ERROR:employee_does_not_work_for_this_service");
+            return false;
+        }
+        // Cannot appoint an employee who works for more than 1 service
+        if (person instanceof User && ((User) person).getEmployers().size() > 1) {
+            System.out.println("ERROR:employee_is_working_at_other_companies");
+            return false;
+        }
+        // Cannot appoint a pilot employee
+        if (person instanceof PilotEmployee) {
+            System.out.println("ERROR:employee_too_busy_piloting_drones");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Method to a train a worker and get pilot credentials.
+     * 
+     * @param person     Person representing the person to train
+     * @param license    String representing the pilot license
+     * @param experience Integer representing the initial piloting experience
+     */
+    public void trainPilot(Person person, String license, Integer experience) {
+        // Validate whether a person can be trained to be a pilot
+        if (!validateTrainPilot(person, experience)) {
+            return;
+        }
+        User employee = (User) person;
+        // Set the license and experience of the worker employee
+        (employee).setLicense(license);
+        (employee).setExperience(experience);
+        System.out.println("OK:pilot_has_been_trained");
+    }
+
+    private boolean validateTrainPilot(Person person, Integer experience) {
+        // Cannot start with negative experience
+        if (experience < 0) {
+            System.out.println("ERROR:cannot_have_negative_experience");
+            return false;
+        }
+        // Cannot train a person who doesn't work for the service
+        if (!this.employments.containsKey(person.getUsername())) {
+            System.out.println("ERROR:employee_does_not_work_for_this_service");
+            return false;
+        }
+        // Cannot appoint a pilot if the service doesn't have a valid manager
+        if (this.getManager() == null) {
+            System.out.println("ERROR:no_valid_manager");
+            return false;
+        }
+        // Cannot train a manager
+        if (person instanceof WorkerEmployee && ((WorkerEmployee) person).getIsManager()) {
+            System.out.println("ERROR:employee_is_too_busy_managing");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Method to appoint a worker employee to a pilot.
+     * 
+     * @param person   Person representing the person to appoint to a pilot
+     * @param people   HashMap<String, Person> representing the datastruture that
+     *                 stores all the people in the system.
+     * @param droneTag Integer representing the drone tag of the drone to control
+     */
+    public void appointPilot(Person person, HashMap<String, Person> people, Integer droneTag) {
+        // Validate if a person can be appointed to be a pilot
+        if (!validateAppointPilot(person)) {
+            return;
+        }
+        // Check if the drone exists in the service
+        if (!this.drones.containsKey(droneTag)) {
+            System.out.println("ERROR:drone_does_not_exist_in_service");
+            return;
+        }
+        // Turn the worker employee into a pilot
+        if (!(person instanceof PilotEmployee)) {
+            people.put(person.getUsername(), new PilotEmployee(((User) person)));
+        }
+        // Have the pilot take control of the drone
+        ((PilotEmployee) people.get(person.getUsername())).takeDrone(droneTag, this.drones, people);
+        System.out.println("OK:employee_has_been_appointed_pilot");
+    }
+
+    /**
+     * Helper method to validate if a person can be appointed to be a pilot.
+     * 
+     * @param person Person representing the person to appoint to pilot
+     * @return boolean representing if the person can be appointed pilot
+     */
+    private boolean validateAppointPilot(Person person) {
+        // Cannot appoint a pilot who doesn't work for the service
+        if (!this.employments.containsKey(person.getUsername())) {
+            System.out.println("ERROR:employee_does_not_work_for_this_service");
+            return false;
+        }
+        // Cannot appoint a manager to be a pilot
+        if (person instanceof WorkerEmployee && ((WorkerEmployee) person).getIsManager()) {
+            System.out.println("ERROR:employee_is_too_busy_managing");
+            return false;
+        }
+        User employee = ((User) person);
+        // Cannot appoint a pilot if they are working at more than 1 service
+        if ((employee).getEmployers().size() > 1) {
+            System.out.println("ERROR:employee_is_working_at_other_companies");
+            return false;
+        }
+        // Cannot appoint a pilot if they don't have a valid license
+        if ((employee).getLicense() == null) {
+            System.out.println("ERROR:no_valid_license");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Method to collect revenue from the sales of the drones.
+     */
+    public void collectRevenue() {
+        if (this.getManager() == null) { // Cannot collect revenue if there is no valid manager
+            System.out.println("ERROR:the_delivery_service_does_not_have_a_valid_manager");
+        } else {
+            int revenue = 0;
+            // Collect the sales from all the service's drones
+            for (Drone drone : this.drones.values()) {
+                revenue += drone.getSales();
+                drone.setSales(0);
+            }
+            this.revenue = revenue;
+        }
+    }
+
+    /**
+     * Method to get the manager of the delivery service
+     * 
+     * @return User representing the manager of the delivery service
+     */
+    private User getManager() {
+        for (Employment employment : this.employments.values()) {
+            if (employment.getType().equals("manager")) {
+                return employment.getUser();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Method to create a delivery service.
+     * 
+     * @param name     String representing the name of the delivery service
+     * @param revenue  Integer revenue representing the amount of initial revenue
+     * @param location String representing the location
+     * @param services HashMap<String, DeliveryService> representing the data
+     *                 structure that stores delivery services
+     * @param services HashMap<String, Location> representing the data
+     *                 structure that stores locations
+     */
+    public static void create(String name, Integer revenue, String location,
+            HashMap<String, DeliveryService> services, HashMap<String, Location> locations) {
+        if (!validateDeliveryService(name, revenue, location, services, locations)) {
+            return;
+        }
+        DeliveryService newDeliveryService = new DeliveryService(name, revenue, location);
+        services.put(newDeliveryService.getName(), newDeliveryService);
+        System.out.println("OK:delivery_service_created");
+    }
+
+    /**
+     * Helper method to validate a delivery service creation
+     * 
+     * @param name     String representing the name of the delivery service
+     * @param revenue  Integer represneting the amount of initial revenue
+     * @param services HashMap<String, DeliveryService> representing the data
+     *                 structure that stores delivery services
+     * @param services HashMap<String, Location> representing the data
+     *                 structure that stores locations
+     * @return boolean representing whether the new delivery service can be created
+     */
+    private static boolean validateDeliveryService(String name, Integer revenue, String location,
+            HashMap<String, DeliveryService> services, HashMap<String, Location> locations) {
+        if (locations.get(location) == null) {
+            System.out.println("ERROR:location_spot_doesn't_exist.");
+        }
+        // Cannot start with negative revenue
+        if (revenue < 0) {
+            System.out.println("ERROR:negative_revenue_not_allowed");
+            return false;
+        }
+        // Delivery service with name already exists
+        if (services.get(name) != null) {
+            System.out.println("ERROR:service_already_exists");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Method to display delivery service drones
+     */
+    public void displayDrones() {
+        for (Drone drone : this.drones.values()) {
+            System.out.println(drone);
+            for (Payload payload : drone.getPayloads().values()) {
+                System.out.println(payload);
+            }
+        }
+    }
+
+    /**
+     * Method to laod fuel onto a drone.
+     * 
+     * @param drone_tag Integer representing the drone tag
+     * @param petrol    Integer representing the amount of petrol to add
+     */
+    public void loadFuel(Integer drone_tag, Integer petrol) {
+        Drone drone = this.drones.get(drone_tag);
+        if (drone == null) {
+            System.out.println("ERROR:drone_doesn't_exist_in_service");
+            return;
+        }
+        if (!drone.getLocation().equals(this.location)) {
+            System.out.println("ERROR:drone_not_located_at_home_base");
+            return;
+        }
+        // Delivery service needs a worker employee in order to load drones
+        boolean hasWorkerEmployee = false;
+        for (Employment employment : this.employments.values()) {
+            if (employment.getType().equals("worker")) {
+                hasWorkerEmployee = true;
+            }
+        }
+        if (!hasWorkerEmployee) {
+            System.out.println("ERROR:delivery_service_doesn't_have_workers_to_load_fuel");
+            return;
+        }
+        drone.addFuel(petrol);
+        System.out.println("OK:fuel_added");
+    }
+
+    /**
+     * Method to load an ingredient onto a drone
+     * 
+     * @param drone_tag   Integer representing the drone tag
+     * @param barcode     String representing the ingredient barcode
+     * @param quantity    Integer representing the ingredient quantity
+     * @param unit_price  Integer representing the ingredient unit price
+     * @param ingredients HashMap<String, Ingredient> representing the data
+     *                    structure that stores the ingredients
+     */
+    public void loadIngredient(Integer drone_tag, String barcode, Integer quantity,
+            Integer unit_price, HashMap<String, Ingredient> ingredients) {
+        Drone drone = this.drones.get(drone_tag);
+        // Drone doesn't exist
+        if (drone == null) {
+            System.out.println("ERROR:delivery_service_doesn't_have_drone");
+            return;
+        }
+        // Drone is not at the home base
+        if (!drone.getLocation().equals(this.location)) {
+            System.out.println("ERROR:drone_not_located_at_home_base");
+            return;
+        }
+        // Drone doesn't have enought capacity left
+        if (drone.getRemainingCapacity() < quantity) {
+            System.out.println("ERROR:drone_does_not_have_enough_space");
+            return;
+        }
+        // Unit price cannot be negative
+        if (unit_price < 0) {
+            System.out.println("ERROR:negative_unit_price_not_allowed");
+            return;
+        }
+        // Delivery service needs a worker employee in order to load drones
+        boolean hasWorkerEmployee = false;
+        for (Employment employment : this.employments.values()) {
+            if (employment.getType().equals("worker")) {
+                hasWorkerEmployee = true;
+            }
+        }
+        if (!hasWorkerEmployee) {
+            System.out.println("ERROR:delivery_service_doesn't_have_workers_to_load_drone");
+            return;
+        }
+        drone.setRemainingCapacity(drone.getRemainingCapacity() - quantity);
+        Payload newPayload = new Payload(quantity, unit_price, ingredients.get(barcode));
+        drone.addPayload(newPayload);
+        System.out.println("OK:ingredient_loaded");
+    }
+
+    /**
+     * toString method for delivery service.
+     */
+    public String toString() {
+        return String.format("name: %s, revenue: $%d, location: %s", this.name, this.revenue, this.location);
+    }
+
+    /**
+     * Method to add a drone to a delivery service
+     * 
+     * @param drone Drone representing the drone to add
+     */
+    public void addDrone(Drone drone) {
+        this.drones.put(drone.getTag(), drone);
     }
 
     public String getName() {
@@ -32,11 +466,7 @@ public class DeliveryService {
         return this.location;
     }
 
-    public ArrayList<Person> getEmployees() {
-        return this.employees;
-    }
-
-    public HashMap<Integer, Drone> getAllDrones( ) {
+    public HashMap<Integer, Drone> getDrones() {
         return this.drones;
     }
 
@@ -52,372 +482,13 @@ public class DeliveryService {
         this.location = location;
     }
 
-    public boolean checkIfDroneExists(Integer droneTag) {
-        return this.drones.containsKey(droneTag);
-    }
-
-    public void addDrone(Drone drone) {
-        this.drones.put(drone.getInitTag(), drone);
-    }
-
+    /**
+     * Getter method to get a drone with a given drone tag
+     * 
+     * @param droneTag Integer representing the drone tag
+     * @return Drone representing the drone found
+     */
     public Drone getDrone(Integer droneTag) {
         return this.drones.get(droneTag);
-    }
-
-    public void displayDrones() {
-        for (Drone drone : this.drones.values()) {
-            System.out.println(drone);
-            if (drone.getAllPayloads().size() > 0){
-                for (Payload payload: drone.getAllPayloads()){
-                    if (payload.getIngredientQuantity() > 0){
-                        System.out.println(payload);
-                    }
-                }
-            }
-            if (drone.getAppointedPilot() != null){
-                System.out.println("&> pilot: " + drone.getAppointedPilot().getUsername());
-            }
-            String result = "";
-            if (drone.getSwarmDrones()!= null && drone.getSwarmDrones().size() > 0) {
-                result = "&> drone is directing this swarm: [ drone tags | ";
-                for (Drone swarm_D : drone.getSwarmDrones()) {
-                            result += swarm_D.getInitTag() + " | ";
-                }
-                result = result.substring(0, result.length() - 2) + "]";
-                System.out.println(result);
-            }
-        }
-    }
-
-    public static String getLocation(String name, ArrayList<DeliveryService> deliveryServicesList) {
-        for (int i = 0; i < deliveryServicesList.size(); i++) {
-            if (deliveryServicesList.get(i).getName().equals(name)) {
-                return deliveryServicesList.get(i).getLocation();
-            }
-        }
-        return "";
-    }
-
-    public static boolean exists(String name, ArrayList<DeliveryService> deliveryServices){
-        for (int i = 0; i < deliveryServices.size(); i++){
-            if (deliveryServices.get(i).getName().equals(name)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //––––––––––phase 3 new methods
-
-    public String hire_worker(Person p) {
-        if (p instanceof Manager) {
-            return "ERROR:employee_can't_be_hired";
-        } else if(p instanceof Pilot && ((Pilot)p).getEmployedby() != null 
-                && !((Pilot)p).getEmployedby().equals(this.getName())) {
-            return "ERROR:person_piloting_can't_be_hired";
-            //     else {
-            //     p.setEmployed(true);
-            //     p.getEmployedIn().add(this);
-            //     this.employees.add(p);
-            //     return "OK:new_employee_has_been_hired";
-            //     }
-        } else {
-            if (this.works_for(p)){
-                return "OK:employee_already_works_for_service" ;
-            } else {
-            p.getEmployedIn().add(this);
-            this.employees.add(p);
-            return "OK:new_employee_has_been_hired";
-            }
-        }
-    }
-
-
-    public String fire_worker(Person p) {
-        if (p.equals(manager)) {
-            return "ERROR:employee_is_managing_a_service";
-        } else if (this.pilots_for(p)) {
-            if (((Pilot)p).getControlledDrones().size() > 0){
-                return "ERROR:person_piloting_can't_be_fired";
-            } else {
-                ((Pilot)p).setEmployedby(null);
-                p.getEmployedIn().remove(this);
-                this.employees.remove(p);
-                this.pilots.remove(p);
-                return "OK:employee_has_been_fired";
-            }
-        } else if (employees.contains(p)) {
-            p.getEmployedIn().remove(this);
-            this.employees.remove(p);
-            return "OK:employee_has_been_fired";
-        }
-        return "ERROR: the_person_wasn't_hired";
-    }
-
-    public String appoint_manager(Person p) {
-        if (employees.contains(p)) {
-            if (!pilots.contains(p)) {
-                if (p.getEmployedIn().size() <= 1) {
-                    if (manager != null) {
-                        for (Person employee : employees) {
-                            if (employee.equals(manager)) {
-                                employee.setManaging("");
-                            }
-                        }
-                    }
-                    manager = p;
-                    p.setManaging(this.getName());
-                    return "OK:employee_has_been_appointed_manager";
-                } else {
-                    return "ERROR:employee_is_working_at_other_companies";
-                }
-            } else {
-                return "ERROR:employee_is_working_as_a_pilot";
-            }
-        }
-        return "ERROR:employee_does_not_work_for_this_service";
-    }
-
-    public String train_pilot(Person p, String init_license, Integer init_experience) {
-        if (this.works_for(p)) {
-            if (!p.equals(manager)) {
-                if (!(this.pilots_for(p))) {
-                    if (manager != null) {
-                        Pilot pilot = new Pilot(this.name, p.getUsername(), p.getFname(), 
-                            p.getLname(), p.getDate(), p.getAddress(),p.getEmployedIn(), 
-                            init_license, init_experience);
-                        pilots.add(pilot);
-                        return "OK:pilot_has_been_trained";
-                    } else {
-                        return "ERROR:the_service_doesn't_have_a_valid_manager";
-                    }
-                } else {
-                    return "ERROR:employee_is_already_working_as_a_pilot";
-                }
-            } else {
-                return "ERROR:employee_is_too_busy_managing";
-            }
-        }
-        return "ERROR:employee_does_not_work_for_this_service";
-    }
-
-    public String appointPilot(Pilot pilot, Integer drone_tag) {
-        Drone d = getDrone(drone_tag);
-        if (d == null) {
-            return "ERROR:drone_does_not_exist_at_this_delivery_service";
-        }
-        if (this.pilots_for(pilot)) {
-            if (pilot.getEmployedIn().size() == 1) {
-                if (pilot.getLicenseID() != null) {
-                    if (pilot.getManaging().equals("")) {
-                        if (pilot.getEmployedIn().size() <= 1) {
-                            if (d.getAppointedPilot() != null) {
-                                d.getAppointedPilot().subtractAppointedDrone(d);
-                            }
-                            pilot.addAppointedDrone(d);
-                            d.setAppointedPilot(pilot);
-                            return "OK:pilot_has_been_appointed_to_drone";
-                        } else {
-                            return "ERROR:employee_is_working_at_more_than_one_company";
-                        }
-                    } else {
-                        return "ERROR:employee_is_working_as_a_manager";
-                    }
-                } else {
-                    return "ERROR:employee_does_not_have_valid_pilot_license";
-                }
-            } else {
-                return "ERROR:employee_is_employed_to_multiple_services";
-            }
-            
-        } else {
-            return "ERROR:employee_is_not_working_for_this_service";
-        }
-    }
-    
-    public String joinSwarm(Integer lead_drone_tag, Integer swarm_drone_tag) {
-        Drone lead_drone = getDrone(lead_drone_tag);
-        Drone swarm_drone = getDrone(swarm_drone_tag);
-        if (lead_drone != null && swarm_drone != null) {
-            if (lead_drone.getLocation().equals(swarm_drone.getLocation())) {
-                if (lead_drone.getAppointedPilot() != null) {
-                    swarm_drone.joinSwarm(lead_drone);
-                    swarm_drone.eraseSwarmDrones();
-                    lead_drone.getSwarmDrones().add(swarm_drone);
-                    return "OK:swarm_drone_has_joined_lead_drone";
-                } else {
-                    return "ERROR:lead_drone_has_no_valid_pilot_or_it_joined_its_own_swarm";
-                }
-            } else {
-                return "ERROR:drones_have_different_locations";
-            }
-        } else {
-           return "ERROR:one_or_both_drones_do_not_exist_at_this_delivery_service";
-        }
-    }
-
-    public String leaveSwarm(Integer swarm_drone_tag) {
-        Drone swarm_drone = getDrone(swarm_drone_tag);
-        if (swarm_drone != null) {
-            Drone swarm_drone_leader = getDrone(swarm_drone.getLeader().getInitTag());
-            if (swarm_drone_leader != null) {
-                swarm_drone_leader.leaveSwarmDrones(swarm_drone);
-                swarm_drone.leaveSwarm();
-                return "OK:change_completed";
-            } else {
-                return "ERROR:drone_is_not_in_swarm";
-            }
-        } else {
-            return "ERROR:drone_does_not_exist_at_this_delivery_service";
-        }
-    }
-
-    private boolean works_for(Person p) {
-        for (Person employee: employees) {
-            if (employee.getUsername().equals(p.getUsername())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean pilots_for(Person p) {
-        for (Pilot pilot: pilots) {
-            if (pilot.getUsername().equals(p.getUsername())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Transfer sales from delivery service drones to delivery service revenue
-    public void collectRevenue() {
-        // Check if delivery service has a valid manager.
-        if (!this.hasValidManager()) {
-            System.out.println("ERROR:the_delivery_service_does_not_have_a_valid_manager");
-        } else {
-            int revenue = 0;
-            // Loop through delivery service drones
-            for (Drone drone : this.drones.values()) {
-                // Add each drone sales to revenue
-                revenue += drone.getSales();
-                // Reset drone sales to 0
-                drone.resetSales();
-            }
-            // Update service revenue
-            this.revenue = revenue;
-        }
-    }
-
-    // Public static method to get delivery service by name.
-    // Returns reference to delivery service if found, else null.
-    public static DeliveryService getServiceByName(String service_name, ArrayList<DeliveryService> deliveryServicesList) {
-        DeliveryService deliveryService = null;
-        for (DeliveryService service : deliveryServicesList) {
-            if (service.getName().equals(service_name)) {
-                deliveryService = service;
-                break;
-            }
-        }
-        return deliveryService;
-    }
-
-    public String loadFuel(Integer drone_tag, Integer petrol) {
-        Drone loadingDrone = getDrone(drone_tag);
-        if (loadingDrone != null) {
-            if (loadingDrone.getLocation().equals(this.getLocation())) {
-                if (employees.size() > pilots.size() + 1) {
-                    loadingDrone.addFuel(petrol);
-                    return "OK:change_completed";
-                } else {
-                    return "ERROR:there_are_not_enough_regular_workers";
-                }
-            } else {
-                return "ERROR:drone_not_located_at_home_base";
-            }
-        } else {
-            return "ERROR:drone_does_not_exist_at_this_delivery_service";
-        }
-    }
-
-    public String loadIngredient(Ingredient i, Integer drone_tag, Integer quantity, Integer unit_price) {
-        Drone loadingDrone = getDrone(drone_tag);
-        if (loadingDrone != null) {
-            if (loadingDrone.getLocation().equals(this.getLocation())) {
-                if (loadingDrone.getRemainingCapacity() >= quantity) {
-                    if (employees.size() > pilots.size() + 1) {
-                        loadingDrone.updateCapacity(quantity, this.getName(), drone_tag, unit_price, i);
-                        return "OK:change_completed";
-                    } else {
-                        return "ERROR:there_are_not_enough_employees";
-                    }
-                } else {
-                    return "ERROR:drone_does_not_have_enough_space";
-                }
-            } else {
-                return "ERROR:drone_not_located_at_home_base";
-            }
-        } else {
-            return "ERROR:drone_does_not_exist_at_this_delivery_service";
-        }
-    }
-    
-    public String flyDrone(Integer drone_tag, String destination_name, ArrayList<Location> locationList) {
-        Drone flyingDrone = getDrone(drone_tag);
-        boolean validFlight = false;
-        String str = null;
-        /* Validates identity of leading drone and iterates over a new ArrayList<Drone> including leading drone and swarm
-        ** to see if whole passes certain conditions. */
-        if (flyingDrone != null) {
-            if (flyingDrone.getAppointedPilot() != null) {
-                ArrayList<Drone> coup = flyingDrone.getSwarmDrones();
-                coup.add(flyingDrone);
-                for (int i = 0; i < coup.size(); i++) {
-                    int distanceTo = Location.calculateDistance(coup.get(i).getLocation(), destination_name, locationList);
-                    int distanceBack = Location.calculateDistance(destination_name, coup.get(i).getLocation(), locationList);
-                    if (coup.get(i).getRemainingFuel() >= distanceTo + distanceBack) {
-                        if (Location.hasSpaceForAll(destination_name, locationList, coup.size())) {
-                            validFlight = true;
-                        } else {
-                            str = "ERROR:not_enough_space_to_maneuver_the_swarm_to_that_location";
-                        }
-                    } else if (coup.get(i).getRemainingFuel() >= distanceTo) {
-                        str = "ERROR:not_enough_fuel_to_reach_home_base_from_the_destination";
-                    } else if (coup.get(i).getRemainingFuel() < distanceTo) {
-                        str = "ERROR:not_enough_fuel_to_reach_the_destination";
-                    }
-                }
-                coup.remove(flyingDrone);
-            } else {
-                str = "ERROR:drone_is_a_swarm_drone";
-            }
-        } else {
-            str = "ERROR:drone_does_not_exist_at_this_delivery_service";
-        }
-        /* After validating all conditions first, iterates over coup and updates all drones.
-        ** The reason for validating all the drones first is that if one of the drones in the middle of the
-        ** coup does not pass the condition, you will still have updated all the prior drones fuel
-        ** and destination, which you would have to revert.
-        */
-        if (validFlight) {
-            ArrayList<Drone> coup = flyingDrone.getSwarmDrones();
-            coup.add(flyingDrone);
-            for (int i = 0; i < coup.size(); i++) {
-                int distanceTo = Location.calculateDistance(coup.get(i).getLocation(), destination_name, locationList);
-                coup.get(i).getAppointedPilot().addExperience(1);
-                coup.get(i).subtractFuel(distanceTo);
-                coup.get(i).updateLocation(destination_name);
-                Location.increaseRemaining(coup.get(i).getLocation(), locationList);
-                Location.decreaseRemaining(destination_name, locationList);
-            }
-            coup.remove(flyingDrone);
-            str = "OK:change_complete";
-        }
-        return str;
-    }
-
-    // Check if delivery service manager is valid.
-    private boolean hasValidManager() {
-        return this.manager != null;
     }
 }

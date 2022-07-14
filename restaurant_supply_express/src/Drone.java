@@ -1,35 +1,349 @@
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Drone {
 
     private String serviceName;
-    private Integer initTag;
+    private Integer tag;
     private Integer initCapacity;
     private Integer remainingCapacity;
-
     private Integer initFuel;
     private Integer remainingFuel;
-    private Integer sales;
-    private ArrayList<Payload> payloads;
+    private Integer sales = 0;
     private String location;
-
-    private Pilot appointedPilot;
+    private PilotEmployee appointedPilotEmployee;
     private Drone leader;
-    private ArrayList<Drone> swarmDrones;
+    private HashMap<String, Payload> payloads;
+    private HashMap<Integer, Drone> swarm;
 
-    public Drone(String serviceName, Integer initTag, Integer initCapacity, Integer initFuel, String location) {
+    public Drone(String serviceName, Integer tag, Integer initCapacity,
+            Integer initFuel, String location) {
         this.serviceName = serviceName;
-        this.initTag = initTag;
+        this.tag = tag;
         this.initCapacity = initCapacity;
         this.initFuel = initFuel;
-        this.sales = 0;
         this.remainingFuel = initFuel;
         this.remainingCapacity = initCapacity;
         this.location = location;
-        this.payloads = new ArrayList<>();
-        this.appointedPilot = null;
+        this.payloads = new HashMap<>();
+        this.swarm = new HashMap<>();
+    }
+
+    /**
+     * Method to create a new drone.
+     * 
+     * @param service_name  String representing the delivery service name
+     * @param init_tag      Integer representing the drone's tag
+     * @param init_capacity Integer representing the drone initial capacity
+     * @param init_fuel     Integer representing the drone initial fuel
+     * @param services      HashMap<String, DeliveryService> representing the data
+     *                      structure that stores services
+     * @param locations     HashMap<String, Location> representing the data
+     *                      structure that stores locations
+     */
+    public static void create(String service_name, Integer init_tag, Integer init_capacity, Integer init_fuel,
+            HashMap<String, DeliveryService> services, HashMap<String, Location> locations) {
+        if (!validateDrone(service_name, init_capacity, init_fuel, services, locations)) {
+            return;
+        }
+        DeliveryService deliveryService = services.get(service_name);
+        Location location = locations.get(deliveryService.getLocation());
+        Drone newDrone = new Drone(service_name, init_tag, init_capacity, init_fuel,
+                location.getName());
+        deliveryService.addDrone(newDrone);
+        location.setRemaining(location.getRemaining() - 1);
+        System.out.println("OK:drone_created");
+    }
+
+    /**
+     * Method to validate a new drone.
+     * 
+     * @param service_name  String representing the delivery service name
+     * @param init_capacity Integer representing the drone initial capacity
+     * @param init_fuel     Integer representing the drone initial fuel
+     * @param services      HashMap<String, DeliveryService> representing the data
+     *                      structure that stores services
+     * @param locations     HashMap<String, Location> representing the data
+     *                      structure that stores locations
+     */
+    private static boolean validateDrone(String service_name, Integer init_capacity, Integer init_fuel,
+            HashMap<String, DeliveryService> services, HashMap<String, Location> locations) {
+        DeliveryService deliveryService = services.get(service_name);
+        // Delivery service doesn't exist
+        if (deliveryService == null) {
+            System.out.println("ERROR:service_does_not_exist");
+            return false;
+        }
+        // Location is out of space
+        if (locations.get(deliveryService.getLocation()).getRemaining() == 0) {
+            System.out.println("ERROR:location_does_not_have_space");
+            return false;
+        }
+        // Drone cannot have negative capacity
+        if (init_capacity < 0) {
+            System.out.println("ERROR:negative_capacity_not_allowed");
+            return false;
+        }
+        // Drone can not have negative fuel
+        if (init_fuel < 0) {
+            System.out.println("ERROR:negative_fuel_not_allowed");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Method to fly a drone to a destination
+     * 
+     * @param destination     Location representing the destination to fly the drone
+     *                        to
+     * @param deliveryService Delivery service representing the service who owns the
+     *                        drone
+     * @param locations       HashMap<String, Location> representing the data
+     *                        structure that stores locations
+     */
+    public void fly(Location destination, DeliveryService deliveryService, HashMap<String, Location> locations) {
+        if (!validateFly(destination, deliveryService, locations)) {
+            return;
+        }
+        Drone swarmLeader = this.leader;
+        boolean isSwarmDrone = this.leader != null ? true : false;
+        if (isSwarmDrone) {
+            for (Drone drone : swarmLeader.getSwarm().values()) {
+                drone.fly(destination, locations.get(drone.getLocation()),
+                        locations.get(deliveryService.getLocation()));
+            }
+            User appointedPilot = ((User) swarmLeader.getAppointedPilotEmployee());
+            appointedPilot.increaseExperience();
+            System.out.println("OK:swarm_flew");
+        } else {
+            this.fly(destination, locations.get(this.location), locations.get(deliveryService.getLocation()));
+            User appointedPilot = ((User) this.appointedPilotEmployee);
+            appointedPilot.increaseExperience();
+            System.out.println("OK:drone_flew");
+        }
+    }
+
+    /**
+     * Method to fly a drone to a location
+     * 
+     * @param destination     Location representing the destination location
+     * @param currentLocation Location representing the current drone location
+     * @param homebase        Location representing the delivery service homebase
+     */
+    private void fly(Location destination, Location currentLocation, Location homebase) {
+        int distanceTo = Location.calculateDistance(destination,
+                currentLocation);
+        int distanceBack = Location.calculateDistance(homebase,
+                destination);
+        this.remainingFuel -= distanceTo + distanceBack;
+        this.setLocation(destination.getName());
+        currentLocation.increaseRemainingSpace();
+        destination.decreaseRemainingSpace();
+    }
+
+    /**
+     * Method to validate whether a drone or swarm can fly
+     * 
+     * @param destination     Location representing the destination location
+     * @param deliveryService DeliveryService representing the delivery service
+     *                        which owns the drones
+     * @param locations       HashMap<String, Location> representing the data
+     *                        strucure which stores the locations
+     * @return boolean representing whether the drone can fly or not
+     */
+    private boolean validateFly(Location destination, DeliveryService deliveryService,
+            HashMap<String, Location> locations) {
+        boolean isSwarmDrone = this.leader != null ? true : false;
+        if (isSwarmDrone) {
+            Drone swarmLeader = this.getLeader();
+            // Swarm leader's pilot doesn't have a valid license
+            if (swarmLeader.getAppointedPilotEmployee().getLicense() == null) {
+                System.out.println("ERROR:swarm_leader_pilot_doesn't_have_valid_license");
+                return false;
+            }
+            int swarmSize = swarmLeader.getSwarm().size();
+            // Not enough space at location for swarm
+            if (destination.getRemaining() < swarmSize) {
+                System.out.println("ERROR:location_doesn't_have_enough_space_for_swarm");
+                return false;
+            }
+            for (Drone drone : swarmLeader.getSwarm().values()) {
+                int distanceTo = Location.calculateDistance(destination,
+                        locations.get(drone.getLocation()));
+                int distanceBack = Location.calculateDistance(locations.get(deliveryService.getLocation()),
+                        destination);
+                if (drone.getRemainingFuel() < distanceTo + distanceBack) {
+                    System.out.println(
+                            "ERROR:a_drone_in_the_swarm_doesn't_have_enough_fuel_to_go_to_destination_and_back");
+                    return false;
+                }
+            }
+        } else if (!isSwarmDrone) {
+            // Drone doesn't have an appointed pilot
+            if (this.getAppointedPilotEmployee() == null) {
+                System.out.println("ERROR:drone_doesn't_have_a_pilot");
+                return false;
+            }
+            // Drone pilot doesn't have a valid license
+            if (this.getAppointedPilotEmployee().getLicense() == null) {
+                System.out.println("ERROR:drone_pilot_doesn't_have_a_valid_license");
+                return false;
+            }
+            // Not enough space for drone at destination
+            if (destination.getRemaining() == 0) {
+                System.out.println("ERROR:destination_location_doesn't_have_enough_space");
+                return false;
+            }
+            int distanceTo = Location.calculateDistance(destination,
+                    locations.get(this.location));
+            int distanceBack = Location.calculateDistance(locations.get(deliveryService.getLocation()), destination);
+            // Not enough fuel to go to destination and back
+            if (this.remainingFuel < distanceTo + distanceBack) {
+                System.out.println("ERROR:not_enough_fuel_to_go_to_destination_and_back");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Method to add a new payload containing an ingredient to a drone.
+     * 
+     * @param newPayload Payload representing the payload to add to the drone
+     */
+    public void addPayload(Payload newPayload) {
+        String ingredientBarcode = newPayload.getIngredientAssociated().getBarcode();
+        Payload existingPayload = this.payloads.get(ingredientBarcode);
+        if (existingPayload == null) {
+            this.payloads.put(ingredientBarcode, newPayload);
+        } else {
+            if (existingPayload.getIngredientUnitPrice() != newPayload.getIngredientUnitPrice()) {
+                System.out.println("ERROR:cannot_add_same_ingredient_with_different_price");
+                return;
+            } else {
+                existingPayload.setIngredientQuantity(
+                        existingPayload.getIngredientQuantity() + newPayload.getIngredientQuantity());
+            }
+        }
+    }
+
+    /**
+     * Method to increase sales of drone after restuarant purchases ingredient
+     * 
+     * @param quantity Integer representing the quantity sold
+     * @param price    Integer representing the price per unit
+     */
+    public void conductSale(int quantity, int price) {
+        int saleValue = quantity * price;
+        this.setSales(this.getSales() + saleValue);
+        this.setRemainingCapacity(this.getRemainingCapacity() + quantity);
+    }
+
+    /**
+     * Method to add a drone to a swarm.
+     * 
+     * @param leaderDrone Drone representing the leader swarm of the drone
+     * @param people      HashMap<String, Person> representing the datastructure
+     *                    that stors people
+     */
+    public void joinSwarm(Drone leaderDrone, HashMap<String, Person> people) {
+        if (!this.location.equals(leaderDrone.getLocation())) {
+            System.out.println("ERROR:leader_drone_and_swarm_drone_at_different_locations");
+            return;
+        }
+        // Cannot join a drone's swarm if it is not the leader of the swarm
+        if (leaderDrone.getAppointedPilotEmployee() == null) {
+            System.out.println("leader_drone_must_be_controlled_by_pilot");
+        }
+        // Remove the drone from pilot's control
+        this.appointedPilotEmployee.renounceDrone(this.tag, people);
+        // Remove appointed pilot employee
+        this.appointedPilotEmployee = null;
+        // Set drone leader
+        this.leader = leaderDrone;
+        // Add the drone to the leader's swarm
+        leaderDrone.addSwarmDrone(this);
+        System.out.println("OK:drone_joined_swarm");
+    }
+
+    /**
+     * Method for a drone to leave a swarm
+     */
+    public void leaveSwarm() {
+        // Set appointed pilot employee to the swarm leader's appointed pilot employee
+        PilotEmployee swarmLeaderPilotEmployee = this.getLeader().getAppointedPilotEmployee();
+        this.setAppointedPilotEmployee(swarmLeaderPilotEmployee);
+        // Remove the swarm drone from the leader's swarm
+        this.leader.removeSwarmDrone(this);
+        // Remove the leader from the swarm drone
         this.leader = null;
-        this.swarmDrones = new ArrayList<>();
+        swarmLeaderPilotEmployee.takeDrone(this);
+    }
+
+    /**
+     * toString for a drone
+     */
+    public String toString() {
+        String pilot = "";
+        String swarm = "";
+        if (this.appointedPilotEmployee != null) {
+            pilot = String.format("\n&> pilot: %s", this.appointedPilotEmployee.getUsername());
+        }
+        if (this.swarm.size() > 0) {
+            String drones = "";
+            for (Drone drone : this.swarm.values()) {
+                drones += String.format("| %d ", drone.getTag());
+            }
+            swarm = String.format("\n&> drone is directing this swarm: [ drone tags %s]", drones);
+        }
+        return String.format("tag: %d, capacity: %d, remaining_cap: %d, fuel: %d, sales: $%d, location: %s", this.tag,
+                this.initCapacity, this.remainingCapacity, this.remainingFuel, this.sales, this.location) + pilot
+                + swarm;
+
+    }
+
+    /**
+     * Getter method for the swarm
+     * 
+     * @return HashMap<Integer, Drone> representing the data structure that stores
+     *         swarm drones
+     */
+    private HashMap<Integer, Drone> getSwarm() {
+        return this.swarm;
+    }
+
+    /**
+     * Getter method for the appointed pilot employee
+     * 
+     * @return Pilot Employee representing the appointed pilot
+     */
+    public PilotEmployee getAppointedPilotEmployee() {
+        return this.appointedPilotEmployee;
+    }
+
+    /**
+     * Setter method for the appointed pilot employee
+     * 
+     * @param pilotEmployee Pilot Employee representing the pilot employee
+     */
+    public void setAppointedPilotEmployee(PilotEmployee pilotEmployee) {
+        this.appointedPilotEmployee = pilotEmployee;
+    }
+
+    public Integer getTag() {
+        return tag;
+    }
+
+    public void setTag(Integer tag) {
+        this.tag = tag;
+    }
+
+    public Integer getSales() {
+        return sales;
+    }
+
+    public void setSales(Integer sales) {
+        this.sales = sales;
     }
 
     public String getServiceName() {
@@ -38,14 +352,6 @@ public class Drone {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
-    }
-
-    public Integer getInitTag() {
-        return initTag;
-    }
-
-    public void setInitTag(Integer initTag) {
-        this.initTag = initTag;
     }
 
     public Integer getInitFuel() {
@@ -72,14 +378,6 @@ public class Drone {
         this.location = location;
     }
 
-    public Integer getSales() {
-        return sales;
-    }
-
-    public void setSales(Integer sales) {
-        this.sales = sales;
-    }
-
     public Integer getRemainingFuel() {
         return remainingFuel;
     }
@@ -96,113 +394,73 @@ public class Drone {
         this.remainingCapacity = remainingCapacity;
     }
 
-    public void addPayload(Payload newPayload) {
-        boolean found = false;
-        for (Payload payload : this.payloads) {
-            if (payload.getIngredientAssociated().getBarcode()
-                    .equals(newPayload.getIngredientAssociated().getBarcode())) {
-                found = true;
-                if (payload.getIngredientUnitPrice() == newPayload.getIngredientUnitPrice()) {
-                    payload.setIngredientQuantity(payload.getIngredientQuantity() + newPayload.getIngredientQuantity());
-                    System.out.println("OK:change_completed");
-                } else {
-                    System.out
-                            .println("OK:the_ingredient_couldn_be_added_as_it_has_a_diffrent_price_than_the_original");
-                }
-            }
-        }
-        if (!found) {
-            this.payloads.add(newPayload);
-            System.out.println("OK:change_completed");
-        }
-    }
-
-    public ArrayList<Payload> getAllPayloads() {
+    /**
+     * Getter method to get all the payloads from a drone
+     * 
+     * @return HashMap<String, Payload> representing the data structure that stores
+     *         payloads
+     */
+    public HashMap<String, Payload> getPayloads() {
         return this.payloads;
     }
 
+    /**
+     * Get the payload with a certain ingredient barcode
+     * 
+     * @param ingredientBarcode
+     * @return
+     */
     public Payload getPayload(String ingredientBarcode) {
-        for (Payload payload : this.payloads) {
-            if (payload.getIngredientAssociated().getBarcode().equals(ingredientBarcode)) {
-                return payload;
-            }
-        }
-        return null;
+        return this.payloads.get(ingredientBarcode);
     }
 
-    public void conductSale(int quantity, int price) {
-        int saleValue = quantity * price;
-        this.setSales(this.getSales() + saleValue);
-        this.setRemainingCapacity(this.getRemainingCapacity() + quantity);
-    }
-
+    /**
+     * Method to remove a payload from a drone if there is not more ingredient
+     * quantity
+     * 
+     * @param payload Payload representing the payload to remove
+     */
     public void removePayload(Payload payload) {
-        this.payloads.remove(payload);
+        this.payloads.remove(payload.getIngredientAssociated().getBarcode());
     }
 
-    public void setAppointedPilot(Pilot p) {
-        this.appointedPilot = p;
-    }
-
-    public Pilot getAppointedPilot() {
-        return appointedPilot;
-    }
-
-    public void setLeader(Drone d) {
-        this.leader = d;
-    }
-
-    public Drone getLeader() {
-        return leader;
-    }
-
-    public void joinSwarm(Drone d) {
-        this.setAppointedPilot(null);
-        this.setLeader(d);
-    }
-
-    public void leaveSwarm() {
-        this.setLeader(null);
-    }
-
-    public String toString() {
-        return "tag: " + this.getInitTag() + ", " + "capacity: " + this.getInitCapacity() + ", " + "remaining_cap: "
-                + this.getRemainingCapacity() + ", " + "fuel: " + this.getRemainingFuel() + ", " + "sales: $"
-                + this.getSales() + ", " + "location: " + this.getLocation();
-    }
-
-    // Reset drone sales to 0 after delivery service collects revenue
-    public void resetSales() {
-        this.sales = 0;
-    }
-
-    public ArrayList<Drone> getSwarmDrones() {
-        return swarmDrones;
-    }
-
-    public void eraseSwarmDrones() {
-        swarmDrones = null;
-    }
-
-    public void leaveSwarmDrones(Drone leavingDrone) {
-        swarmDrones.remove(leavingDrone);
-    }
-
+    /**
+     * Method to add fuel to a drone
+     * 
+     * @param petrol Integer representing the amount of petrol to add
+     */
     public void addFuel(Integer petrol) {
         this.setRemainingFuel(this.getRemainingFuel() + petrol);
     }
 
-    public void subtractFuel(Integer petrol) {
-        this.setRemainingFuel(this.getRemainingFuel() - petrol);
+    /**
+     * Method to add a drone into a leader drone's swarm
+     * 
+     * @param drone Drone representing the swarm drone
+     */
+    public void addSwarmDrone(Drone drone) {
+        this.swarm.put(drone.getTag(), drone);
     }
 
-    public void updateCapacity(Integer quantity, String name, Integer drone_tag, Integer unit_price, Ingredient i) {
-        this.setRemainingCapacity(this.getRemainingCapacity() - quantity);
-        Payload newPayload = new Payload(name, drone_tag, quantity, unit_price, i);
-        this.addPayload(newPayload);
+    /**
+     * Method to remove a drone from a leader's swarm
+     * 
+     * @param drone Drone representing the swarm drone
+     */
+    public void removeSwarmDrone(Drone drone) {
+        this.swarm.remove(drone.getTag());
     }
 
-    public void updateLocation(String destination) {
-        this.setLocation(destination);
+    /**
+     * Method to get the swarm leader
+     * 
+     * @return Drone representing the swarm leader
+     */
+    public Drone getLeader() {
+        return this.leader;
+    }
+
+    public void setLeader(Drone drone) {
+        this.leader = drone;
     }
 }
