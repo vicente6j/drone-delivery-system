@@ -1,5 +1,3 @@
-import java.util.HashMap;
-
 public class Location {
 
     private String name;
@@ -8,55 +6,12 @@ public class Location {
     private Integer spaceLimit;
     private Integer remaining;
 
-    public Location(String init_name, Integer init_x_coord, Integer init_y_coord, Integer init_space_limit) {
-        this.name = init_name;
-        this.x_coord = init_x_coord;
-        this.y_coord = init_y_coord;
-        this.spaceLimit = init_space_limit;
-        this.remaining = init_space_limit;
-    }
-
-    /**
-     * Method to create a new location.
-     * 
-     * @param name       String representing the location name
-     * @param x_coord    Integer representing the location x coordinate
-     * @param y_coord    Integer representing the location y coordinate
-     * @param spaceLimit Integer representing the location space limit
-     * @param locations  HashMap<String, Location> representing the data strucute
-     *                   that stores locations
-     */
-    public static void create(String name, Integer x_coord, Integer y_coord, Integer spaceLimit,
-            HashMap<String, Location> locations) {
-        if (!validateLocation(name, spaceLimit, locations)) {
-            return;
-        }
-        Location newLocation = new Location(name, x_coord, y_coord, spaceLimit);
-        locations.put(name, newLocation);
-        System.out.println("OK:location_created");
-    }
-
-    /**
-     * Helper method to validate the creation of a new location
-     * 
-     * @param name       String representing the name of the location
-     * @param spaceLimit Integer representing the space limit of the location
-     * @param locations  HashMap<String, Location> representing the data strucute
-     *                   that stores locations
-     * @return boolean representing if the new location can be created
-     */
-    private static boolean validateLocation(String name, Integer spaceLimit, HashMap<String, Location> locations) {
-        // Space limit can not be negative
-        if (spaceLimit < 0) {
-            System.out.println("ERROR:space_limit_cannot_be_negative");
-            return false;
-        }
-        // Location already exists
-        if (locations.get(name) != null) {
-            System.out.println("ERROR:location_already_exists");
-            return false;
-        }
-        return true;
+    private Location(LocationBuilder builder) {
+        this.name = builder.name;
+        this.x_coord = builder.x_coord;
+        this.y_coord = builder.y_coord;
+        this.spaceLimit = builder.spaceLimit;
+        this.remaining = builder.spaceLimit;
     }
 
     /**
@@ -127,5 +82,34 @@ public class Location {
      */
     public void decreaseRemainingSpace() {
         this.remaining -= 1;
+    }
+
+    public static class LocationBuilder {
+        private String name;
+        private int x_coord;
+        private int y_coord;
+        private int spaceLimit;
+        private int remaining;
+
+        public LocationBuilder(String name, int x_coord, int y_coord) {
+            this.name = name;
+            this.x_coord = x_coord;
+            this.y_coord = y_coord;
+        }
+
+        public LocationBuilder spaceLimit(int spaceLimit) {
+            this.spaceLimit = spaceLimit;
+            return this;
+        }
+
+        public LocationBuilder remaining(int remaining) {
+            this.remaining = remaining;
+            return this;
+        }
+
+        public Location build() {
+            Location newLocation = new Location(this);
+            return newLocation;
+        }
     }
 }

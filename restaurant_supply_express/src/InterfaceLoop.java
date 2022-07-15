@@ -13,7 +13,18 @@ public class InterfaceLoop {
     public static HashMap<String, Person> people = new HashMap<>();
 
     void makeIngredient(String init_barcode, String init_name, Integer init_weight) {
-        Ingredient.create(init_barcode, init_name, init_weight, ingredients);
+        if (init_weight < 0) {
+            System.out.println("ERROR:negative_weight_not_allowed");
+            return;
+        }
+        // Ingredient already exists
+        if (ingredients.get(init_barcode) != null) {
+            System.out.println("ERROR:ingredient_already_exists");
+            return;
+        }
+        Ingredient newIngredient = new Ingredient.IngredientBuilder(init_barcode, init_name, init_weight).build();
+        ingredients.put(init_barcode, newIngredient);
+        System.out.println("OK:ingredient_created");
     }
 
     void displayIngredients() {
@@ -24,7 +35,20 @@ public class InterfaceLoop {
     }
 
     void makeLocation(String init_name, Integer init_x_coord, Integer init_y_coord, Integer init_space_limit) {
-        Location.create(init_name, init_x_coord, init_y_coord, init_space_limit, locations);
+        // Space limit can not be negative
+        if (init_space_limit < 0) {
+            System.out.println("ERROR:space_limit_cannot_be_negative");
+            return;
+        }
+        // Location already exists
+        if (locations.get(init_name) != null) {
+            System.out.println("ERROR:location_already_exists");
+            return;
+        }
+        Location newLocation = new Location.LocationBuilder(init_name, init_x_coord, init_y_coord)
+                .spaceLimit(init_space_limit).remaining(init_space_limit).build();
+        locations.put(init_name, newLocation);
+        System.out.println("OK:location_created");
     }
 
     void displayLocations() {
@@ -50,7 +74,24 @@ public class InterfaceLoop {
     }
 
     void makeDeliveryService(String init_name, Integer init_revenue, String located_at) {
-        DeliveryService.create(init_name, init_revenue, located_at, services, locations);
+        if (locations.get(located_at) == null) {
+            System.out.println("ERROR:location_spot_doesn't_exist.");
+            return;
+        }
+        // Cannot start with negative revenue
+        if (init_revenue < 0) {
+            System.out.println("ERROR:negative_revenue_not_allowed");
+            return;
+        }
+        // Delivery service with name already exists
+        if (services.get(init_name) != null) {
+            System.out.println("ERROR:service_already_exists");
+            return;
+        }
+        DeliveryService newDeliveryService = new DeliveryService.DeliveryServiceBuilder(init_name, init_revenue,
+                located_at).build();
+        services.put(init_name, newDeliveryService);
+        System.out.println("OK:delivery_service_created");
     }
 
     void displayServices() {
@@ -61,7 +102,19 @@ public class InterfaceLoop {
     }
 
     void makeRestaurant(String init_name, String located_at) {
-        Restaurant.create(init_name, located_at, restaurants, locations);
+        // Restaurant already exists
+        if (restaurants.get(init_name) != null) {
+            System.out.println("ERROR:restaurant_already_exists");
+            return;
+        }
+        // Location doesn't exist
+        if (locations.get(located_at) == null) {
+            System.out.println("ERROR:location_spot_doesn't_exist.");
+            return;
+        }
+        Restaurant newRestaurant = new Restaurant.RestaurantBuilder(init_name, located_at).build();
+        restaurants.put(init_name, newRestaurant);
+        System.out.println("OK:restaurant_created");
     }
 
     void displayRestaurants() {
@@ -72,7 +125,12 @@ public class InterfaceLoop {
     }
 
     void makeDrone(String service_name, Integer init_tag, Integer init_capacity, Integer init_fuel) {
-        Drone.create(service_name, init_tag, init_capacity, init_fuel, services, locations);
+        DeliveryService deliveryService = services.get(service_name);
+        if (deliveryService == null) {
+            System.out.println("ERROR:the_service_does_not_exist");
+            return;
+        }
+        deliveryService.makeDrone(init_tag, init_capacity, init_fuel, locations.get(deliveryService.getLocation()));
     }
 
     void displayDrones(String service_name) {

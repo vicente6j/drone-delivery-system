@@ -5,85 +5,9 @@ public class Restaurant {
     private String location;
     private Integer spent = 0;
 
-    public Restaurant(String name, String location) {
-        this.name = name;
-        this.location = location;
-    }
-
-    /**
-     * Method to create a new restaurant
-     * 
-     * @param name        String representing the name of the restaurant
-     * @param location    String representing the location of the restaurant
-     * @param restaurants HashMap<String, Restaurant> representing the data strucute
-     *                    that stores the restaurants
-     * @param locations   HashMap<String, Location> representing the data structure
-     *                    that stores the locations
-     */
-    public static void create(String name, String location, HashMap<String, Restaurant> restaurants,
-            HashMap<String, Location> locations) {
-        if (!validateRestaurant(name, location, restaurants, locations)) {
-            return;
-        }
-        Restaurant newRestaurant = new Restaurant(name, location);
-        restaurants.put(name, newRestaurant);
-        System.out.println("OK:restaurant_created");
-    }
-
-    /**
-     * Helper method to validate the creation of a new restaurant
-     * 
-     * @param name        String representing the name of the restaurant
-     * @param location    String representing the location of the restaurant
-     * @param restaurants HashMap<String, Restaurant> representing the data strucute
-     *                    that stores the restaurants
-     * @param locations   HashMap<String, Location> representing the data structure
-     *                    that stores the locations
-     */
-    private static boolean validateRestaurant(String name, String location, HashMap<String, Restaurant> restaurants,
-            HashMap<String, Location> locations) {
-        // Restaurant already exists
-        if (restaurants.get(name) != null) {
-            System.out.println("ERROR:restaurant_already_exists");
-            return false;
-        }
-        // Location doesn't exist
-        if (locations.get(location) == null) {
-            System.out.println("ERROR:location_spot_doesn't_exist.");
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * toString for the restaurant
-     */
-    public String toString() {
-        return String.format("name: %s, money_spent: $%d, location: %s", this.name, this.spent, this.location);
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getLocation() {
-        return this.location;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public Integer getMoneySpent() {
-        return this.spent;
-    }
-
-    public void setMoneySpent(Integer spent) {
-        this.spent = spent;
+    private Restaurant(RestaurantBuilder builder) {
+        this.name = builder.name;
+        this.location = builder.location;
     }
 
     /**
@@ -171,5 +95,51 @@ public class Restaurant {
      */
     public void makePurchase(Integer quantityProduct, Integer unitPriceProduct) {
         this.spent += quantityProduct * unitPriceProduct;
+    }
+
+    /**
+     * toString for the restaurant
+     */
+    public String toString() {
+        return String.format("name: %s, money_spent: $%d, location: %s", this.name, this.spent, this.location);
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getLocation() {
+        return this.location;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Integer getMoneySpent() {
+        return this.spent;
+    }
+
+    public void setMoneySpent(Integer spent) {
+        this.spent = spent;
+    }
+
+    public static class RestaurantBuilder {
+        private String name;
+        private String location;
+
+        public RestaurantBuilder(String name, String location) {
+            this.name = name;
+            this.location = location;
+        }
+
+        public Restaurant build() {
+            Restaurant restaurant = new Restaurant(this);
+            return restaurant;
+        }
     }
 }

@@ -29,69 +29,6 @@ public class Drone {
     }
 
     /**
-     * Method to create a new drone.
-     * 
-     * @param service_name  String representing the delivery service name
-     * @param init_tag      Integer representing the drone's tag
-     * @param init_capacity Integer representing the drone initial capacity
-     * @param init_fuel     Integer representing the drone initial fuel
-     * @param services      HashMap<String, DeliveryService> representing the data
-     *                      structure that stores services
-     * @param locations     HashMap<String, Location> representing the data
-     *                      structure that stores locations
-     */
-    public static void create(String service_name, Integer init_tag, Integer init_capacity, Integer init_fuel,
-            HashMap<String, DeliveryService> services, HashMap<String, Location> locations) {
-        if (!validateDrone(service_name, init_capacity, init_fuel, services, locations)) {
-            return;
-        }
-        DeliveryService deliveryService = services.get(service_name);
-        Location location = locations.get(deliveryService.getLocation());
-        Drone newDrone = new Drone(service_name, init_tag, init_capacity, init_fuel,
-                location.getName());
-        deliveryService.addDrone(newDrone);
-        location.decreaseRemainingSpace();
-        System.out.println("OK:drone_created");
-    }
-
-    /**
-     * Method to validate a new drone.
-     * 
-     * @param service_name  String representing the delivery service name
-     * @param init_capacity Integer representing the drone initial capacity
-     * @param init_fuel     Integer representing the drone initial fuel
-     * @param services      HashMap<String, DeliveryService> representing the data
-     *                      structure that stores services
-     * @param locations     HashMap<String, Location> representing the data
-     *                      structure that stores locations
-     */
-    private static boolean validateDrone(String service_name, Integer init_capacity, Integer init_fuel,
-            HashMap<String, DeliveryService> services, HashMap<String, Location> locations) {
-        DeliveryService deliveryService = services.get(service_name);
-        // Delivery service doesn't exist
-        if (deliveryService == null) {
-            System.out.println("ERROR:service_does_not_exist");
-            return false;
-        }
-        // Location is out of space
-        if (locations.get(deliveryService.getLocation()).getRemaining() == 0) {
-            System.out.println("ERROR:location_does_not_have_space");
-            return false;
-        }
-        // Drone cannot have negative capacity
-        if (init_capacity < 0) {
-            System.out.println("ERROR:negative_capacity_not_allowed");
-            return false;
-        }
-        // Drone can not have negative fuel
-        if (init_fuel < 0) {
-            System.out.println("ERROR:negative_fuel_not_allowed");
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Method to fly a drone to a destination
      * 
      * @param destination     Location representing the destination to fly the drone

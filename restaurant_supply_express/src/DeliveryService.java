@@ -4,15 +4,64 @@ public class DeliveryService {
     private String name;
     private Integer revenue;
     private String location;
-    private HashMap<String, Employment> employments;
-    private HashMap<Integer, Drone> drones;
+    private HashMap<String, Employment> employments = new HashMap<>();
+    private HashMap<Integer, Drone> drones = new HashMap<>();
 
-    public DeliveryService(String name, Integer revenue, String location) {
-        this.name = name;
-        this.revenue = revenue;
-        this.location = location;
-        this.employments = new HashMap<>();
-        this.drones = new HashMap<>();
+    private DeliveryService(DeliveryServiceBuilder builder) {
+        this.name = builder.name;
+        this.revenue = builder.revenue;
+        this.location = builder.location;
+    }
+
+    /**
+     * Method for a delivery service to create a drone
+     * 
+     * @param init_tag      Integer representing the drone's tag
+     * @param init_capacity Integer representing the drone initial capacity
+     * @param init_fuel     Integer representing the drone initial fuel
+     * @param location      Location representing the location of the delivery
+     *                      service
+     */
+    public void makeDrone(Integer init_tag, Integer init_capacity, Integer init_fuel, Location location) {
+        if (!this.validateMakeDrone(init_tag, init_capacity, init_fuel, location)) {
+            return;
+        }
+        Drone newDrone = new Drone(this.name, init_tag, init_capacity, init_fuel, this.location);
+        this.drones.put(init_tag, newDrone);
+        location.decreaseRemainingSpace();
+        System.out.println("OK:drone_created");
+    }
+
+    /**
+     * Helper method to validate the creation of a drone.
+     * 
+     * @param init_tag      Integer representing the drone tag
+     * @param init_capacity Integer representing the initial capacity
+     * @param init_fuel     Integer representing the initial fuel amount
+     * @param location      Location representing the service location
+     * @return boolean representing if the drone can be created
+     */
+    private boolean validateMakeDrone(Integer init_tag, Integer init_capacity, Integer init_fuel, Location location) {
+        // Location doesn't have space
+        if (location.getRemaining() == 0) {
+            System.out.println("ERROR:location_does_not_have_space");
+            return false;
+        }
+        if (this.drones.containsKey(init_tag)) {
+            System.out.println("ERROR:drone_already_exists");
+            return false;
+        }
+        // Drone cannot have negative capacity
+        if (init_capacity < 0) {
+            System.out.println("ERROR:negative_capacity_not_allowed");
+            return false;
+        }
+        // Drone can not have negative fuel
+        if (init_fuel < 0) {
+            System.out.println("ERROR:negative_fuel_not_allowed");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -297,56 +346,6 @@ public class DeliveryService {
     }
 
     /**
-     * Method to create a delivery service.
-     * 
-     * @param name     String representing the name of the delivery service
-     * @param revenue  Integer revenue representing the amount of initial revenue
-     * @param location String representing the location
-     * @param services HashMap<String, DeliveryService> representing the data
-     *                 structure that stores delivery services
-     * @param services HashMap<String, Location> representing the data
-     *                 structure that stores locations
-     */
-    public static void create(String name, Integer revenue, String location,
-            HashMap<String, DeliveryService> services, HashMap<String, Location> locations) {
-        if (!validateDeliveryService(name, revenue, location, services, locations)) {
-            return;
-        }
-        DeliveryService newDeliveryService = new DeliveryService(name, revenue, location);
-        services.put(newDeliveryService.getName(), newDeliveryService);
-        System.out.println("OK:delivery_service_created");
-    }
-
-    /**
-     * Helper method to validate a delivery service creation
-     * 
-     * @param name     String representing the name of the delivery service
-     * @param revenue  Integer represneting the amount of initial revenue
-     * @param services HashMap<String, DeliveryService> representing the data
-     *                 structure that stores delivery services
-     * @param services HashMap<String, Location> representing the data
-     *                 structure that stores locations
-     * @return boolean representing whether the new delivery service can be created
-     */
-    private static boolean validateDeliveryService(String name, Integer revenue, String location,
-            HashMap<String, DeliveryService> services, HashMap<String, Location> locations) {
-        if (locations.get(location) == null) {
-            System.out.println("ERROR:location_spot_doesn't_exist.");
-        }
-        // Cannot start with negative revenue
-        if (revenue < 0) {
-            System.out.println("ERROR:negative_revenue_not_allowed");
-            return false;
-        }
-        // Delivery service with name already exists
-        if (services.get(name) != null) {
-            System.out.println("ERROR:service_already_exists");
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Method to display delivery service drones
      */
     public void displayDrones() {
@@ -495,5 +494,22 @@ public class DeliveryService {
 
     public HashMap<String, Employment> getEmployments() {
         return this.employments;
+    }
+
+    public static class DeliveryServiceBuilder {
+        private String name;
+        private Integer revenue;
+        private String location;
+
+        public DeliveryServiceBuilder(String name, Integer revenue, String location) {
+            this.name = name;
+            this.revenue = revenue;
+            this.location = location;
+        }
+
+        public DeliveryService build() {
+            DeliveryService newDeliveryService = new DeliveryService(this);
+            return newDeliveryService;
+        }
     }
 }
