@@ -500,48 +500,43 @@ public class DeliveryService {
     public HashMap<String, Employment> getEmployments() {
         return this.employments;
     }
+    /**
+     * updates the restaurant membership from the hashmap stored in this classs
+     * @param rest the restaurant object passed in
+     * @param quantity the quantity that the passed in restaurant is ordering
+     * @param unitPrice the unit price of the ingredient ordered
+     */
 
     public void updateMembership(Restaurant rest, Integer quantity, Integer unitPrice) { // change
         if(!(membershipTracker.containsKey(rest))) {
             membershipTracker.put(rest, "regular");
             restaurantPurchaseDirectory.put(rest, 0);
         }
-        String membershipStatus = membershipTracker.get(rest);
         Integer membershipPoints = restaurantPurchaseDirectory.get(rest);
         Integer addingPoints = quantity * unitPrice;
         restaurantPurchaseDirectory.put(rest, membershipPoints + addingPoints);
-        switch (membershipStatus) {
-            case "regular":
-                if(restaurantPurchaseDirectory.get(rest) > 500) {
-                    membershipTracker.put(rest, "bronze");
-                    System.out.println("Congratulations! You've become a bronze member.");
-                }
-                break;
-            case "bronze":
-                if(restaurantPurchaseDirectory.get(rest) > 1000) {
-                    membershipTracker.put(rest, "silver");
-                    System.out.println("Congratulations! You've become a silver member.");
-                }
-                break;
-            case "silver":
-                if(restaurantPurchaseDirectory.get(rest) > 2000) {
-                    membershipTracker.put(rest, "gold");
-                    System.out.println("Congratulations! You've become a gold member.");
-                }
-                break;
-            case "gold":
-                if(restaurantPurchaseDirectory.get(rest) > 5000) {
-                    membershipTracker.put(rest, "platinum");
-                    System.out.println("Congratulations! You've become a platinum member.");
-                }
-                break;
-            case "platinum":
-                System.out.println("Thankyou for your purchase. Your membership remains Platinum.");
-                break;
+        String pastMenebership = this.getMembership(rest);
+        if(restaurantPurchaseDirectory.get(rest) >= 500 && restaurantPurchaseDirectory.get(rest) < 1000) {
+            membershipTracker.put(rest, "bronze");
+        }else if(restaurantPurchaseDirectory.get(rest) >= 1000 && restaurantPurchaseDirectory.get(rest) < 2000) {
+            membershipTracker.put(rest, "silver");
+        } else if(restaurantPurchaseDirectory.get(rest) >= 2000 && restaurantPurchaseDirectory.get(rest) < 5000) {
+            membershipTracker.put(rest, "gold");
+        } else if(restaurantPurchaseDirectory.get(rest) >= 5000) {
+            membershipTracker.put(rest, "platinum");
+        }
+        if (pastMenebership.equals(this.getMembership(rest))){
+            System.out.println("Thank_you_for_being_a_loyal_customer!_Your_order_price_will_represent_your_"+ this.getMembership(rest) +"_membership_benefits!");
+        } else {
+            System.out.println("Congratulations!_You've_become_a_"+ this.getMembership(rest) +"_member._From_now_on_you_will_enjoy_the_benefits_of_our_"+ this.getMembership(rest)+"_membership_for_your_next_orders_that_you_place_at_this_system!");
         }
         System.out.println("OK:membership_updated");
     }
-
+    /**
+     * method that returns the membership status of a passed in restaurant
+     * @param rest the restaurant we want to find out about
+     * @return the membership status
+     */
     public String getMembership(Restaurant rest) {
         if(membershipTracker.containsKey(rest)) {
             return membershipTracker.get(rest);
@@ -549,7 +544,13 @@ public class DeliveryService {
             return null;
         }
     }
-
+    /**
+     * the method that calculates the price spent by a restaurant depending on what discount it has deducted from its membership status
+     * @param rest the restaursnt passed in
+     * @param quantitythe quantity that the passed in restaurant is ordering
+     * @param pricePerUnit the unit price of the ingredient ordered
+     * @return the price calculated
+     */
     public Double priceAfterDiscount(Restaurant rest, Integer quantity, Integer pricePerUnit) {
         if (membershipTracker.get(rest) == null) {
             return (1.0) * quantity * pricePerUnit;

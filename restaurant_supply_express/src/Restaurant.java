@@ -4,7 +4,7 @@ public class Restaurant {
     private String name;
     private String location;
     private Double spent = 0.0;
-    private HashMap<DeliveryService, String> memberships;
+    private Map<DeliveryService, String> memberships;
 
     public Restaurant(String name, String location) {
         this.name = name;
@@ -64,10 +64,10 @@ public class Restaurant {
         String basicInfo = String.format("name: %s, money_spent: $%.2f, location: %s", this.name, this.spent, this.location);
         if(!(memberships.isEmpty())) {
             String membership = "";
-            for (Map.Entry ms: memberships.entrySet()) {
-                membership += (String)ms.getKey().getName() + ": " + (String)ms.getValue() + " member\n";
+            for (Map.Entry<DeliveryService, String> ms: memberships.entrySet()) {
+                membership += ms.getKey().getName()+ ": " + (String)ms.getValue() + " member\n";
             }
-            return basicInfo + membership.substring(0, membership.length()-1);
+            return basicInfo +"\n& "+membership.substring(0, membership.length()-1);
         }
         else {
             return basicInfo;
@@ -126,7 +126,7 @@ public class Restaurant {
             return;
         }
         if (deliveryService.getMembership(this) == null) { //changes 
-            if(quantity * payload.getIngredientUnitPrice() > 5) {
+            if(quantity * payload.getIngredientUnitPrice() >= 5) {
                 this.makePurchase(deliveryService.priceAfterDiscount(this, quantity, payload.getIngredientUnitPrice()));
                 drone.conductSale(deliveryService.priceAfterDiscount(this, quantity, payload.getIngredientUnitPrice()), quantity);
                 payload.postSaleUpdate(quantity, drone);
