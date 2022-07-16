@@ -557,15 +557,15 @@ public class DeliveryService {
         String currentMembership = membershipTracker.get(rest);
         switch(currentMembership) {
             case "regular":
-                return (1.0) * quantity * pricePerUnit;
+                return Math.floor(1.0* quantity * pricePerUnit);
             case "bronze":
-                return (quantity * pricePerUnit * 0.97);
+                return Math.floor(quantity * pricePerUnit * 0.97);
             case "silver":
-                return (quantity * pricePerUnit * 0.95);
+                return Math.floor(quantity * pricePerUnit * 0.95);
             case "gold":
-                return (quantity * pricePerUnit * 0.93);
+                return Math.floor(quantity * pricePerUnit * 0.93);
             case "platinum":
-                return (quantity * pricePerUnit * 0.90);
+                return Math.floor(quantity * pricePerUnit * 0.90);
         }
         return 0.0;
     }
