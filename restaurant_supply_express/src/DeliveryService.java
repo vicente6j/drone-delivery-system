@@ -557,7 +557,7 @@ public class DeliveryService {
         String currentMembership = membershipTracker.get(rest);
         switch(currentMembership) {
             case "regular":
-                return Math.floor(1.0* quantity * pricePerUnit);
+                return Math.floor(1.0 * quantity * pricePerUnit);
             case "bronze":
                 return Math.floor(quantity * pricePerUnit * 0.97);
             case "silver":
