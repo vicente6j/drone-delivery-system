@@ -1,5 +1,7 @@
 import java.util.Scanner;
 import java.util.HashMap;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 public class InterfaceLoop {
 
@@ -201,7 +203,11 @@ public class InterfaceLoop {
             System.out.println("ERROR:person_already_exists");
             return;
         }
-        Person.create(init_username, init_fname, init_lname, init_year, init_month, init_date, init_address, people);
+        Date date_format = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat(init_year + "-" + init_month + "-" + init_date);
+        Person person = new Person(init_username, init_fname, init_lname, formatter.format(date_format), init_address);
+        people.put(init_username, person);
+        System.out.println("OK:person_created");
     }
 
     void displayPersons() {
